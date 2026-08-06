@@ -1,0 +1,201 @@
+/*==========================================
+    MENU HEADER
+==========================================*/
+
+.menu-header{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:15px;
+
+    padding:20px;
+
+}
+
+.menu-header h1{
+
+    font-size:1.5rem;
+
+    font-weight:600;
+
+}
+
+.back-btn{
+
+    width:45px;
+
+    height:45px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    background:white;
+
+    border-radius:12px;
+
+    box-shadow:var(--shadow-sm);
+
+}
+
+/*==========================================
+    CATEGORY
+==========================================*/
+
+.menu-category{
+
+    display:flex;
+
+    gap:12px;
+
+    margin-top:20px;
+
+    margin-bottom:24px;
+
+    overflow-x:auto;
+
+    overflow-y:hidden;
+
+    flex-wrap:nowrap;
+
+    scroll-behavior:smooth;
+
+    -webkit-overflow-scrolling:touch;
+
+    padding:5px 0 12px;
+
+}
+
+/* Sembunyikan scrollbar */
+
+.menu-category::-webkit-scrollbar{
+
+    display:none;
+
+}
+/*==========================================
+    CATEGORY WRAPPER
+==========================================*/
+
+.category-wrapper{
+
+    position:relative;
+
+}
+
+.category-wrapper::after{
+
+    content:"";
+
+    position:absolute;
+
+    top:0;
+
+    right:0;
+
+    width:40px;
+
+    height:100%;
+
+    background:linear-gradient(
+        to right,
+        rgba(245,245,245,0),
+        rgba(245,245,245,1)
+    );
+
+    pointer-events:none;
+
+}
+.menu-category{
+
+    scrollbar-width:none;
+
+}
+
+.category-btn{
+
+    flex:0 0 auto;
+
+    padding:10px 18px;
+
+    border:none;
+
+    border-radius:25px;
+
+    background:#fff;
+
+    cursor:pointer;
+
+    box-shadow:var(--shadow-sm);
+
+    white-space:nowrap;
+
+    transition:var(--transition);
+
+}
+.category-btn.active{
+
+    background:var(--primary-color);
+
+    color:white;
+
+}
+/*==========================================
+    FOOD CATEGORY
+==========================================*/
+
+.food-category{
+
+    color:var(--text-light);
+
+    font-size:.85rem;
+
+    margin-top:4px;
+
+}
+
+/*==========================================
+    NO RESULT
+==========================================*/
+
+.food-grid:has(.no-result){
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    min-height:60vh;
+
+    grid-template-columns:none;
+
+}
+
+.no-result{
+
+    width:100%;
+
+    min-height:auto;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    text-align:center;
+
+    color:var(--text-light);
+
+    font-size:1rem;
+
+    font-weight:500;
+
+    padding:20px;
+
+}

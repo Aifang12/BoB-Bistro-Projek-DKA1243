@@ -1,0 +1,29 @@
+/*==========================================
+    PAGE FADE
+==========================================*/
+
+body{
+
+    animation:fadePage .35s ease;
+
+}
+
+@keyframes fadePage{
+
+    from{
+
+        opacity:0;
+
+        transform:translateY(10px);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:translateY(0);
+
+    }
+
+}

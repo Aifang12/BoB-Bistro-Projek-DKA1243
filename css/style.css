@@ -1,0 +1,122 @@
+/* ==========================================
+   DESIGN SYSTEM
+========================================== */
+
+@import url("variables.css");
+
+/* ==========================================
+   COMPONENTS
+========================================== */
+
+@import url("components.css");
+
+/* ==========================================
+   PAGE STYLES
+========================================== */
+
+@import url("pages/home.css");
+@import url("pages/menu.css");
+@import url("pages/product.css");
+@import url("pages/cart.css");
+@import url("pages/checkout.css");
+@import url("pages/order-status.css");
+
+/* ==========================================
+   EFFECTS
+========================================== */
+
+@import url("animations.css");
+@import url("responsive.css");
+/* ==========================================
+   GOOGLE FONT
+========================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+
+/* ==========================================
+   RESET
+========================================== */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+
+    font-family:var(--font-family);
+
+    background:var(--background-color);
+
+    color:var(--text-color);
+
+    overflow-x:hidden;
+
+}
+
+/*===========================================
+IMAGE
+===========================================*/
+
+img{
+
+    max-width:100%;
+
+    display:block;
+
+}
+
+/*===========================================
+LINK
+===========================================*/
+
+a{
+
+    text-decoration:none;
+
+    color:inherit;
+
+}
+
+/*===========================================
+LIST
+===========================================*/
+
+ul{
+
+    list-style:none;
+
+}
+
+/*===========================================
+BUTTON
+===========================================*/
+
+button{
+
+    border:none;
+
+    outline:none;
+
+    cursor:pointer;
+
+    font-family:inherit;
+
+}
+
+/*===========================================
+INPUT
+===========================================*/
+
+input,textarea,select{
+
+    font-family:inherit;
+
+    outline:none;
+
+}

@@ -1,0 +1,101 @@
+/* ==========================================
+   B@BISTRO DESIGN SYSTEM
+   Author : Aiman & Putera
+   Version : 1.0
+========================================== */
+
+:root{
+
+    /*=======================================
+      COLORS
+    =======================================*/
+
+    --primary-color: #B71C1C;
+    --primary-hover: #D32F2F;
+    --secondary-color: #F5F5F5;
+
+    --background-color: #FAFAFA;
+    --surface-color: #FFFFFF;
+
+    --success-color: #2E7D32;
+    --warning-color: #F9A825;
+    --danger-color: #C62828;
+
+    --text-color: #2D2D2D;
+    --text-light: #757575;
+    --border-color: #E0E0E0;
+
+    /*=======================================
+      TYPOGRAPHY
+    =======================================*/
+
+    --font-family: "Poppins", sans-serif;
+
+    --font-xs: .75rem;
+    --font-sm: .875rem;
+    --font-md: 1rem;
+    --font-lg: 1.25rem;
+    --font-xl: 1.5rem;
+    --font-2xl: 2rem;
+    --font-3xl: 2.5rem;
+
+    /*=======================================
+      FONT WEIGHT
+    =======================================*/
+
+    --fw-light:300;
+    --fw-normal:400;
+    --fw-medium:500;
+    --fw-semibold:600;
+    --fw-bold:700;
+
+    /*=======================================
+      SPACING
+    =======================================*/
+
+    --space-1:4px;
+    --space-2:8px;
+    --space-3:12px;
+    --space-4:16px;
+    --space-5:20px;
+    --space-6:24px;
+    --space-7:32px;
+    --space-8:40px;
+    --space-9:48px;
+    --space-10:64px;
+
+    /*=======================================
+      BORDER RADIUS
+    =======================================*/
+
+    --radius-sm:8px;
+    --radius-md:12px;
+    --radius-lg:16px;
+    --radius-xl:24px;
+    --radius-round:50%;
+
+    /*=======================================
+      SHADOW
+    =======================================*/
+
+    --shadow-sm:0 2px 6px rgba(0,0,0,.08);
+
+    --shadow-md:0 6px 18px rgba(0,0,0,.10);
+
+    --shadow-lg:0 12px 30px rgba(0,0,0,.12);
+
+    /*=======================================
+      TRANSITION
+    =======================================*/
+
+    --transition:.3s ease;
+
+    /*=======================================
+      CONTAINER
+    =======================================*/
+
+    --mobile-width:390px;
+    --tablet-width:768px;
+    --desktop-width:1200px;
+
+}
