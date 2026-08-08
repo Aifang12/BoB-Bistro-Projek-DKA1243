@@ -1,59 +1,136 @@
 /*==========================================
+    PRODUCT PAGE
+==========================================*/
+
+/*==========================================
+    GET PRODUCT ID
+==========================================*/
+
+const urlParams =
+    new URLSearchParams(window.location.search);
+
+const productId =
+    Number(urlParams.get("id"));
+
+
+/*==========================================
     DOM ELEMENTS
 ==========================================*/
 
-const productImage = document.getElementById("productImage");
-const productCategory = document.getElementById("productCategory");
-const productName = document.getElementById("productName");
-const productRating = document.getElementById("productRating");
-const productPrice = document.getElementById("productPrice");
-const productDescription = document.getElementById("productDescription");
+const productImage =
+    document.getElementById("productImage");
 
-const quantityElement = document.getElementById("quantity");
-const totalPriceElement = document.getElementById("totalPrice");
+const productCategory =
+    document.getElementById("productCategory");
 
-const minusBtn = document.getElementById("minusBtn");
-const plusBtn = document.getElementById("plusBtn");
+const productName =
+    document.getElementById("productName");
 
-const addToCartBtn = document.getElementById("addToCartBtn");
-const cartBadge = document.getElementById("cartBadge");
+const productRating =
+    document.getElementById("productRating");
+
+const productPrice =
+    document.getElementById("productPrice");
+
+const productDescription =
+    document.getElementById("productDescription");
+
+const totalPriceElement =
+    document.getElementById("totalPrice");
+
+const quantityElement =
+    document.getElementById("quantity");
+
+const minusBtn =
+    document.getElementById("minusBtn");
+
+const plusBtn =
+    document.getElementById("plusBtn");
+
+const addToCartBtn =
+    document.getElementById("addToCartBtn");
+
+const cartBadge =
+    document.querySelector(".cart-badge");
+
 
 /*==========================================
-    VARIABLES
+    QUANTITY
 ==========================================*/
-
-const params = new URLSearchParams(window.location.search);
-
-const productId = Number(params.get("id"));
-
-const product = foods.find(food => food.id === productId);
 
 let quantity = 1;
 
+
 /*==========================================
-    FUNCTIONS
+    UPDATE TOTAL PRICE
 ==========================================*/
 
-function loadProduct() {
+function updateTotalPrice() {
+
+    if (!totalPriceElement) return;
 
     if (!product) {
 
-        alert("Produk tidak dijumpai.");
-
-        window.location.href = "menu.html";
+        totalPriceElement.textContent =
+            "RM 0.00";
 
         return;
 
     }
 
-    productImage.src = product.image;
-    productImage.alt = product.name;
+    totalPriceElement.textContent =
+        `RM ${(product.price * quantity).toFixed(2)}`;
 
-    productCategory.textContent = product.category;
+}
 
-    productName.textContent = product.name;
 
-    productRating.textContent = product.rating;
+/*==========================================
+    FIND PRODUCT
+==========================================*/
+
+const product =
+    foods.find(food => food.id === productId);
+
+
+/*==========================================
+    PRODUCT NOT FOUND
+==========================================*/
+
+if (!product) {
+
+    productName.textContent =
+        "Produk tidak dijumpai.";
+
+    productDescription.textContent =
+        "Maaf, produk yang anda cari tidak tersedia.";
+
+    addToCartBtn.disabled = true;
+
+    updateTotalPrice();
+
+}
+
+
+/*==========================================
+    DISPLAY PRODUCT
+==========================================*/
+
+else {
+
+    productImage.src =
+        product.image;
+
+    productImage.alt =
+        product.name;
+
+    productCategory.textContent =
+        product.category;
+
+    productName.textContent =
+        product.name;
+
+    productRating.textContent =
+        product.rating;
 
     productPrice.textContent =
         `RM ${product.price.toFixed(2)}`;
@@ -61,56 +138,93 @@ function loadProduct() {
     productDescription.textContent =
         product.description;
 
-    updateTotal();
+    updateTotalPrice();
 
 }
 
-function updateTotal() {
 
-    quantityElement.textContent = quantity;
+/*==========================================
+    PLUS BUTTON
+==========================================*/
 
-    const total = product.price * quantity;
-
-    totalPriceElement.textContent =
-        `RM ${total.toFixed(2)}`;
-
-}
-
-function increaseQuantity() {
+plusBtn.addEventListener("click", () => {
 
     quantity++;
 
-    updateTotal();
+    quantityElement.textContent =
+        quantity;
 
-}
+    updateTotalPrice();
 
-function decreaseQuantity() {
+});
+
+
+/*==========================================
+    MINUS BUTTON
+==========================================*/
+
+minusBtn.addEventListener("click", () => {
 
     if (quantity > 1) {
 
         quantity--;
 
-        updateTotal();
+        quantityElement.textContent =
+            quantity;
+
+        updateTotalPrice();
 
     }
 
-}
+});
 
-function addToCart() {
 
-    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+/*==========================================
+    ADD TO CART
+==========================================*/
 
-    const existingItem = cart.find(item => item.id === product.id);
+addToCartBtn.addEventListener("click", () => {
 
-    if (existingItem) {
+    if (!product) return;
 
-        existingItem.quantity += quantity;
 
-    } else {
+    /*------------------------------------------
+        GET EXISTING CART
+    ------------------------------------------*/
+
+    let cart =
+        JSON.parse(
+            localStorage.getItem("cart")
+        ) || [];
+
+
+    /*------------------------------------------
+        CHECK EXISTING PRODUCT
+    ------------------------------------------*/
+
+    const existingProduct =
+        cart.find(
+            item => item.id === product.id
+        );
+
+
+    if (existingProduct) {
+
+        existingProduct.quantity += quantity;
+
+    }
+
+    else {
 
         cart.push({
 
             id: product.id,
+
+            name: product.name,
+
+            price: product.price,
+
+            image: product.image,
 
             quantity: quantity
 
@@ -118,56 +232,89 @@ function addToCart() {
 
     }
 
-    localStorage.setItem("cart", JSON.stringify(cart));
+
+    /*------------------------------------------
+        SAVE CART
+    ------------------------------------------*/
+
+    localStorage.setItem(
+        "cart",
+        JSON.stringify(cart)
+    );
+
+
+    /*------------------------------------------
+        UPDATE BADGE
+    ------------------------------------------*/
 
     updateCartBadge();
 
-    addToCartBtn.innerHTML = `
-        <i class="bi bi-check-circle-fill"></i>
-        Ditambah
-    `;
+
+    /*------------------------------------------
+        RESET QUANTITY
+    ------------------------------------------*/
+
+    quantity = 1;
+
+    quantityElement.textContent =
+        quantity;
+
+    updateTotalPrice();
+
+
+    /*------------------------------------------
+        BUTTON FEEDBACK
+    ------------------------------------------*/
+
+    const originalText =
+        addToCartBtn.textContent;
+
+    addToCartBtn.textContent =
+        "Ditambah ke Bakul ✓";
+
 
     setTimeout(() => {
 
-        addToCartBtn.innerHTML = `
-            <i class="bi bi-cart-plus"></i>
-            Tambah Ke Bakul
-        `;
+        addToCartBtn.textContent =
+            originalText;
 
     }, 1500);
 
-}
+});
+
+
+/*==========================================
+    CART BADGE
+==========================================*/
 
 function updateCartBadge() {
 
-    const cart = JSON.parse(localStorage.getItem("cart")) || [];
+    if (!cartBadge) return;
 
-    let totalItem = 0;
+
+    const cart =
+        JSON.parse(
+            localStorage.getItem("cart")
+        ) || [];
+
+
+    let totalItems = 0;
+
 
     cart.forEach(item => {
 
-        totalItem += item.quantity;
+        totalItems += item.quantity;
 
     });
 
-    cartBadge.textContent = totalItem;
+
+    cartBadge.textContent =
+        totalItems;
 
 }
-
-/*==========================================
-    EVENT LISTENERS
-==========================================*/
-
-plusBtn.addEventListener("click", increaseQuantity);
-
-minusBtn.addEventListener("click", decreaseQuantity);
-
-addToCartBtn.addEventListener("click", addToCart);
-
 /*==========================================
     INITIALIZE
 ==========================================*/
 
-loadProduct();
-
 updateCartBadge();
+updateTotalPrice();
