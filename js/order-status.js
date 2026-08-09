@@ -10,9 +10,6 @@
 const orderIdElement =
     document.getElementById("orderId");
 
-const orderStatusElement =
-    document.getElementById("orderStatus");
-
 const orderTableElement =
     document.getElementById("orderTable");
 
@@ -22,54 +19,221 @@ const orderPaymentElement =
 const orderNotesElement =
     document.getElementById("orderNotes");
 
+const orderTotalElement =
+    document.getElementById("orderTotal");
+
 const orderItemsElement =
     document.getElementById("orderItems");
 
-const orderItemsContainer =
-    document.getElementById(
-        "orderItemsContainer"
-    );
+const statusIcon =
+    document.getElementById("statusIcon");
 
-const orderTotalElement =
-    document.getElementById("orderTotal");
+const statusTitle =
+    document.getElementById("statusTitle");
+
+const statusDescription =
+    document.getElementById("statusDescription");
+
+const cartBadge =
+    document.getElementById("cartBadge");
 
 
 /*==========================================
     GET ORDER
 ==========================================*/
 
-function getOrder() {
-
-    return JSON.parse(
+const currentOrder =
+    JSON.parse(
         localStorage.getItem("currentOrder")
     );
+
+
+/*==========================================
+    STATUS DATA
+==========================================*/
+
+const orderStatuses = [
+
+    {
+        name: "Menunggu",
+
+        description:
+            "Pesanan anda telah diterima.",
+
+        icon:
+            "bi-clock"
+    },
+
+    {
+        name: "Sedang Disediakan",
+
+        description:
+            "Pesanan sedang disediakan.",
+
+        icon:
+            "bi-fire"
+    },
+
+    {
+        name: "Sedia Diambil",
+
+        description:
+            "Pesanan anda sudah siap.",
+
+        icon:
+            "bi-check-circle"
+    }
+
+];
+
+
+/*==========================================
+    STATUS START TIME
+==========================================*/
+
+function getStatusStartTime() {
+
+    const orderCreatedAt =
+        currentOrder?.createdAt;
+
+    if (orderCreatedAt) {
+
+        const createdAtTime =
+            new Date(orderCreatedAt).getTime();
+
+        localStorage.setItem(
+            "orderStatusStartTime",
+            String(createdAtTime)
+        );
+
+        return createdAtTime;
+
+    }
+
+
+    let startTime =
+        localStorage.getItem(
+            "orderStatusStartTime"
+        );
+
+
+    if (!startTime) {
+
+        startTime =
+            Date.now();
+
+        localStorage.setItem(
+            "orderStatusStartTime",
+            startTime
+        );
+
+    }
+
+
+    return Number(startTime);
 
 }
 
 
 /*==========================================
-    PAYMENT LABEL
+    GET CURRENT STATUS
 ==========================================*/
 
-function getPaymentLabel(paymentMethod) {
+function getCurrentStatus() {
 
-    switch (paymentMethod) {
+    const startTime =
+        getStatusStartTime();
 
-        case "fpx":
+    const elapsed =
+        Math.floor(
+            (Date.now() - startTime) / 1000
+        );
 
-            return "FPX";
 
-        case "online-banking":
+    /*
+        0 - 9 saat
+        = Menunggu
 
-            return "Online Banking";
+        10 - 19 saat
+        = Sedang Disediakan
 
-        case "cash":
+        20 saat ke atas
+        = Sedia Diambil
+    */
 
-            return "Tunai di Kaunter";
 
-        default:
+    if (elapsed < 10) {
 
-            return "Tidak Dinyatakan";
+        return 0;
+
+    }
+
+
+    if (elapsed < 20) {
+
+        return 1;
+
+    }
+
+
+    return 2;
+
+}
+
+
+/*==========================================
+    DISPLAY STATUS
+==========================================*/
+
+function displayStatus() {
+
+    const statusIndex =
+        getCurrentStatus();
+
+    const status =
+        orderStatuses[statusIndex];
+
+
+    /*--------------------------------------
+        ICON
+    --------------------------------------*/
+
+    statusIcon.innerHTML = `
+
+        <i class="bi ${status.icon}"></i>
+
+    `;
+
+
+    /*--------------------------------------
+        TITLE
+    --------------------------------------*/
+
+    statusTitle.textContent =
+        status.name;
+
+
+    /*--------------------------------------
+        DESCRIPTION
+    --------------------------------------*/
+
+    statusDescription.textContent =
+        status.description;
+
+
+    /*--------------------------------------
+        SAVE STATUS
+    --------------------------------------*/
+
+    if (currentOrder) {
+
+        currentOrder.status =
+            status.name;
+
+        localStorage.setItem(
+            "currentOrder",
+            JSON.stringify(currentOrder)
+        );
 
     }
 
@@ -77,25 +241,15 @@ function getPaymentLabel(paymentMethod) {
 
 
 /*==========================================
-    LOAD ORDER
+    LOAD ORDER INFORMATION
 ==========================================*/
 
-function loadOrder() {
+function loadOrderInformation() {
 
-    const order = getOrder();
-
-
-    /*------------------------------------------
-        ORDER NOT FOUND
-    ------------------------------------------*/
-
-    if (!order) {
+    if (!currentOrder) {
 
         orderIdElement.textContent =
             "Tiada Tempahan";
-
-        orderStatusElement.textContent =
-            "-";
 
         orderTableElement.textContent =
             "-";
@@ -106,35 +260,105 @@ function loadOrder() {
         orderNotesElement.textContent =
             "-";
 
-        orderItemsElement.textContent =
-            "0";
-
         orderTotalElement.textContent =
             "RM 0.00";
 
-        orderItemsContainer.innerHTML = `
+        return;
 
-            <div class="empty-cart">
+    }
 
-                <i class="bi bi-receipt"></i>
 
-                <h2>
-                    Tiada tempahan ditemui
-                </h2>
+    /*--------------------------------------
+        ORDER ID
+    --------------------------------------*/
 
-                <p>
-                    Sila buat tempahan terlebih dahulu.
-                </p>
+    orderIdElement.textContent =
+        currentOrder.id;
 
-                <a
-                    href="menu.html"
-                    class="btn btn-primary">
 
-                    Lihat Menu
+    /*--------------------------------------
+        TABLE
+    --------------------------------------*/
 
-                </a>
+    orderTableElement.textContent =
+        `Meja ${currentOrder.table}`;
 
-            </div>
+
+    /*--------------------------------------
+        PAYMENT
+    --------------------------------------*/
+
+    orderPaymentElement.textContent =
+        formatPaymentMethod(
+            currentOrder.paymentMethod
+        );
+
+
+    /*--------------------------------------
+        NOTES
+    --------------------------------------*/
+
+    orderNotesElement.textContent =
+        currentOrder.notes
+        ? currentOrder.notes
+        : "Tiada komen";
+
+
+    /*--------------------------------------
+        TOTAL
+    --------------------------------------*/
+
+    orderTotalElement.textContent =
+        `RM ${currentOrder.totalPrice.toFixed(2)}`;
+
+}
+
+
+/*==========================================
+    FORMAT PAYMENT METHOD
+==========================================*/
+
+function formatPaymentMethod(method) {
+
+    switch (method) {
+
+        case "fpx":
+
+            return "FPX";
+
+
+        case "online":
+
+            return "Online Banking";
+
+
+        case "cash":
+
+            return "Tunai";
+
+
+        default:
+
+            return method || "-";
+
+    }
+
+}
+
+
+/*==========================================
+    LOAD ORDER ITEMS
+==========================================*/
+
+function loadOrderItems() {
+
+    if (!currentOrder) {
+
+        orderItemsElement.innerHTML = `
+
+            <p class="no-result">
+                Tiada maklumat pesanan.
+            </p>
 
         `;
 
@@ -143,52 +367,20 @@ function loadOrder() {
     }
 
 
-    /*------------------------------------------
-        ORDER INFORMATION
-    ------------------------------------------*/
-
-    orderIdElement.textContent =
-        order.id;
-
-    orderStatusElement.textContent =
-        order.status;
-
-    orderTableElement.textContent =
-        `Meja ${order.table}`;
-
-    orderPaymentElement.textContent =
-        getPaymentLabel(
-            order.paymentMethod
-        );
-
-    orderNotesElement.textContent =
-        order.notes || "Tiada komen";
-
-    orderItemsElement.textContent =
-        order.totalItems;
-
-    orderTotalElement.textContent =
-        `RM ${order.totalPrice.toFixed(2)}`;
+    orderItemsElement.innerHTML = "";
 
 
-    /*------------------------------------------
-        DISPLAY ITEMS
-    ------------------------------------------*/
-
-    orderItemsContainer.innerHTML = "";
-
-
-    order.items.forEach(item => {
+    currentOrder.items.forEach(item => {
 
         const itemTotal =
             item.price * item.quantity;
 
 
-        orderItemsContainer.innerHTML += `
+        orderItemsElement.innerHTML += `
 
-            <article class="order-item">
+            <div class="summary-item">
 
-                <div class="order-item-image">
+                <div class="summary-image">
 
                     <img
                         src="${item.image}"
@@ -197,30 +389,26 @@ function loadOrder() {
                 </div>
 
 
-                <div class="order-item-info">
+                <div class="summary-info">
 
-                    <h3 class="order-item-name">
-
+                    <h3>
                         ${item.name}
-
                     </h3>
 
-                    <span class="order-item-quantity">
-
+                    <span>
                         Kuantiti: ${item.quantity}
-
                     </span>
 
                 </div>
 
 
-                <span class="order-item-price">
+                <span class="summary-price">
 
                     RM ${itemTotal.toFixed(2)}
 
                 </span>
 
-            </article>
+            </div>
 
         `;
 
@@ -230,7 +418,70 @@ function loadOrder() {
 
 
 /*==========================================
+    CART BADGE
+==========================================*/
+
+function updateCartBadge() {
+
+    if (!cartBadge) return;
+
+
+    const cart =
+        JSON.parse(
+            localStorage.getItem("cart")
+        ) || [];
+
+
+    let totalItems = 0;
+
+
+    cart.forEach(item => {
+
+        totalItems +=
+            item.quantity;
+
+    });
+
+
+    cartBadge.textContent =
+        totalItems;
+
+}
+
+
+/*==========================================
+    CHECK ORDER
+==========================================*/
+
+function checkOrderStatus() {
+
+    if (!currentOrder) return;
+
+
+    displayStatus();
+
+}
+
+
+/*==========================================
     INITIALIZE
 ==========================================*/
 
-loadOrder();
+loadOrderInformation();
+
+loadOrderItems();
+
+updateCartBadge();
+
+checkOrderStatus();
+
+
+/*==========================================
+    REAL-TIME STATUS UPDATE
+==========================================*/
+
+setInterval(() => {
+
+    checkOrderStatus();
+
+}, 1000);

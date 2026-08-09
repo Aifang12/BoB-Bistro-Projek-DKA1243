@@ -8,18 +8,17 @@
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0">
 
-    <title>Status Tempahan | B@Bistro</title>
+    <title>Status Pesanan | B@Bistro</title>
 
     <!-- Bootstrap Icons -->
-
     <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 
-    <!-- CSS -->
-
+    <!-- CSS Utama -->
     <link rel="stylesheet"
         href="css/style.css">
 
+    <!-- CSS Order Status -->
     <link rel="stylesheet"
         href="css/pages/order-status.css">
 
@@ -33,21 +32,32 @@
 
     <header class="order-header container">
 
-        <div class="order-header-spacer"></div>
+        <a href="index.html"
+            class="order-home-btn">
 
-        <div class="order-logo">
+            <i class="bi bi-house"></i>
 
-            <img
-                src="images/logo/logo coloured.svg"
-                alt="B@Bistro">
+        </a>
 
-        </div>
+        <img
+            src="images/logo/logo coloured.svg"
+            alt="B@Bistro"
+            class="order-logo">
 
-        <span class="order-header-icon">
+        <a href="cart.html"
+            class="order-cart-btn">
 
-            <i class="bi bi-receipt"></i>
+            <i class="bi bi-cart3"></i>
 
-        </span>
+            <span
+                class="cart-badge"
+                id="cartBadge">
+
+                0
+
+            </span>
+
+        </a>
 
     </header>
 
@@ -56,13 +66,14 @@
         MAIN
     ===========================================-->
 
-    <main class="container">
+    <main class="order-status-page container">
+
 
         <!--======================================
             SUCCESS
         =======================================-->
 
-        <section class="order-success">
+        <section class="success-section">
 
             <div class="success-icon">
 
@@ -100,26 +111,32 @@
 
 
         <!--======================================
-            ORDER STATUS
+            CURRENT STATUS
         =======================================-->
 
-        <section class="status-card">
+        <section class="current-status-card">
 
-            <div class="status-icon">
+            <div
+                class="status-icon"
+                id="statusIcon">
 
-                <i class="bi bi-clock-history"></i>
+                <i class="bi bi-clock"></i>
 
             </div>
 
-            <div class="status-info">
+            <div class="status-content">
 
-                <span>
+                <span class="status-label">
                     Status Tempahan
                 </span>
 
-                <strong id="orderStatus">
+                <h2 id="statusTitle">
                     Menunggu
-                </strong>
+                </h2>
+
+                <p id="statusDescription">
+                    Pesanan anda telah diterima.
+                </p>
 
             </div>
 
@@ -130,34 +147,50 @@
             ORDER INFORMATION
         =======================================-->
 
-        <section class="order-section">
+        <section class="order-info-section">
 
             <h2>
                 Maklumat Tempahan
             </h2>
 
+
             <div class="order-info-card">
+
+
+                <!-- MEJA -->
 
                 <div class="info-row">
 
-                    <span>
-                        <i class="bi bi-table"></i>
-                        Nombor Meja
-                    </span>
+                    <div class="info-left">
+
+                        <i class="bi bi-grid-3x3-gap"></i>
+
+                        <span>
+                            Nombor Meja
+                        </span>
+
+                    </div>
 
                     <strong id="orderTable">
-                        -
+                        Meja -
                     </strong>
 
                 </div>
 
 
+                <!-- PAYMENT -->
+
                 <div class="info-row">
 
-                    <span>
+                    <div class="info-left">
+
                         <i class="bi bi-credit-card"></i>
-                        Pembayaran
-                    </span>
+
+                        <span>
+                            Pembayaran
+                        </span>
+
+                    </div>
 
                     <strong id="orderPayment">
                         -
@@ -166,28 +199,43 @@
                 </div>
 
 
+                <!-- NOTES -->
+
                 <div class="info-row">
 
-                    <span>
+                    <div class="info-left">
+
                         <i class="bi bi-chat-left-text"></i>
-                        Komen
-                    </span>
+
+                        <span>
+                            Komen
+                        </span>
+
+                    </div>
 
                     <strong id="orderNotes">
-                        -
+                        Tiada komen
                     </strong>
 
                 </div>
 
+
+                <!-- TOTAL -->
+
                 <div class="info-row">
 
-                    <span>
-                        <i class="bi bi-basket"></i>
-                        Jumlah Item
-                    </span>
+                    <div class="info-left">
 
-                    <strong id="orderItems">
-                        0
+                        <i class="bi bi-receipt"></i>
+
+                        <span>
+                            Jumlah
+                        </span>
+
+                    </div>
+
+                    <strong id="orderTotal">
+                        RM 0.00
                     </strong>
 
                 </div>
@@ -198,20 +246,18 @@
 
 
         <!--======================================
-            ORDER ITEMS
+            ORDER SUMMARY
         =======================================-->
 
-        <section class="order-section">
+        <section class="order-summary-section">
 
             <h2>
-                Pesanan Anda
+                Ringkasan Pesanan
             </h2>
 
             <div
-                id="orderItemsContainer"
-                class="order-items">
-
-                <!-- Item akan dijana oleh order-status.js -->
+                class="order-summary-card"
+                id="orderItems">
 
             </div>
 
@@ -219,39 +265,18 @@
 
 
         <!--======================================
-            TOTAL
+            BACK TO HOME
         =======================================-->
 
-        <section class="order-total">
+        <a href="index.html"
+            class="btn btn-primary back-home-btn">
 
-            <span>
-                Jumlah Bayaran
-            </span>
+            <i class="bi bi-house"></i>
 
-            <strong id="orderTotal">
-                RM 0.00
-            </strong>
+            Kembali ke Laman Utama
 
-        </section>
+        </a>
 
-
-        <!--======================================
-            ACTION
-        =======================================-->
-
-        <section class="order-action">
-
-            <a
-                href="menu.html"
-                class="btn btn-primary">
-
-                <i class="bi bi-house"></i>
-
-                Kembali ke Menu
-
-            </a>
-
-        </section>
 
     </main>
 

@@ -367,6 +367,9 @@ placeOrderBtn.addEventListener(
             CREATE ORDER
         --------------------------------------*/
 
+        const createdAt =
+            new Date().toISOString();
+
         const order = {
 
             id:
@@ -396,7 +399,7 @@ placeOrderBtn.addEventListener(
                 "Menunggu",
 
             createdAt:
-                new Date().toISOString()
+                createdAt
 
         };
 
@@ -408,6 +411,11 @@ placeOrderBtn.addEventListener(
         localStorage.setItem(
             "currentOrder",
             JSON.stringify(order)
+        );
+
+        localStorage.setItem(
+            "orderStatusStartTime",
+            String(new Date(createdAt).getTime())
         );
 
 
