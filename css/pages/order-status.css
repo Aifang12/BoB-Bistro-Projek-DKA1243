@@ -1,0 +1,500 @@
+/*==========================================
+    ORDER HEADER
+==========================================*/
+
+.order-header {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding: 20px 0;
+
+}
+
+.order-header-spacer {
+
+    width: 45px;
+
+}
+
+.order-logo img {
+
+    width: 130px;
+
+    height: auto;
+
+}
+
+.order-header-icon {
+
+    width: 45px;
+
+    height: 45px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    background: #fff;
+
+    border-radius: 12px;
+
+    box-shadow: var(--shadow-sm);
+
+}
+
+.order-header-icon i {
+
+    color: var(--primary-color);
+
+    font-size: 1.3rem;
+
+}
+
+
+/*==========================================
+    SUCCESS
+==========================================*/
+
+.order-success {
+
+    text-align: center;
+
+    padding: 25px 10px;
+
+}
+
+.success-icon {
+
+    width: 75px;
+
+    height: 75px;
+
+    margin: 0 auto 18px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #e9f8ee;
+
+    color: #28a745;
+
+}
+
+.success-icon i {
+
+    font-size: 2.2rem;
+
+}
+
+.order-success h1 {
+
+    font-size: 1.6rem;
+
+    margin-bottom: 8px;
+
+}
+
+.order-success p {
+
+    color: var(--text-light);
+
+    font-size: .9rem;
+
+    line-height: 1.6;
+
+}
+
+
+/*==========================================
+    ORDER NUMBER
+==========================================*/
+
+.order-number-card {
+
+    text-align: center;
+
+    padding: 20px;
+
+    background: var(--primary-color);
+
+    color: white;
+
+    border-radius: 18px;
+
+    box-shadow: var(--shadow-md);
+
+}
+
+.order-number-card span {
+
+    display: block;
+
+    font-size: .85rem;
+
+    opacity: .85;
+
+    margin-bottom: 8px;
+
+}
+
+.order-number-card strong {
+
+    display: block;
+
+    font-size: 1.7rem;
+
+    letter-spacing: 1px;
+
+}
+
+
+/*==========================================
+    STATUS
+==========================================*/
+
+.status-card {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 15px;
+
+    margin-top: 18px;
+
+    padding: 16px;
+
+    background: #fff;
+
+    border-radius: 16px;
+
+    box-shadow: var(--shadow-sm);
+
+}
+
+.status-icon {
+
+    width: 48px;
+
+    height: 48px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 12px;
+
+    background: #fff3cd;
+
+    color: #d39e00;
+
+}
+
+.status-icon i {
+
+    font-size: 1.3rem;
+
+}
+
+.status-info {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 4px;
+
+}
+
+.status-info span {
+
+    color: var(--text-light);
+
+    font-size: .8rem;
+
+}
+
+.status-info strong {
+
+    font-size: 1rem;
+
+}
+
+
+/*==========================================
+    ORDER SECTION
+==========================================*/
+
+.order-section {
+
+    margin-top: 30px;
+
+}
+
+.order-section h2 {
+
+    font-size: 1.1rem;
+
+    margin-bottom: 15px;
+
+}
+
+
+/*==========================================
+    ORDER INFORMATION
+==========================================*/
+
+.order-info-card {
+
+    background: #fff;
+
+    padding: 8px 16px;
+
+    border-radius: 16px;
+
+    box-shadow: var(--shadow-sm);
+
+}
+
+.info-row {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 15px;
+
+    padding: 15px 0;
+
+    border-bottom: 1px solid var(--border-color);
+
+}
+
+.info-row:last-child {
+
+    border-bottom: none;
+
+}
+
+.info-row span {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    color: var(--text-light);
+
+    font-size: .85rem;
+
+}
+
+.info-row span i {
+
+    color: var(--primary-color);
+
+}
+
+.info-row strong {
+
+    font-size: .9rem;
+
+    text-align: right;
+
+}
+
+
+/*==========================================
+    ORDER ITEMS
+==========================================*/
+
+.order-items {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 10px;
+
+}
+
+.order-item {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 12px;
+
+    background: #fff;
+
+    border-radius: 14px;
+
+    box-shadow: var(--shadow-sm);
+
+}
+
+.order-item-image {
+
+    width: 60px;
+
+    height: 60px;
+
+    flex-shrink: 0;
+
+    overflow: hidden;
+
+    border-radius: 12px;
+
+}
+
+.order-item-image img {
+
+    width: 100%;
+
+    height: 100%;
+
+    object-fit: cover;
+
+}
+
+.order-item-info {
+
+    flex: 1;
+
+}
+
+.order-item-name {
+
+    font-size: .9rem;
+
+    font-weight: 600;
+
+    margin-bottom: 4px;
+
+}
+
+.order-item-quantity {
+
+    color: var(--text-light);
+
+    font-size: .75rem;
+
+}
+
+.order-item-price {
+
+    color: var(--primary-color);
+
+    font-size: .9rem;
+
+    font-weight: 700;
+
+}
+
+
+/*==========================================
+    TOTAL
+==========================================*/
+
+.order-total {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    margin-top: 25px;
+
+    padding: 18px;
+
+    background: #fff;
+
+    border-radius: 16px;
+
+    box-shadow: var(--shadow-sm);
+
+}
+
+.order-total span {
+
+    font-weight: 600;
+
+}
+
+.order-total strong {
+
+    color: var(--primary-color);
+
+    font-size: 1.3rem;
+
+}
+
+
+/*==========================================
+    ACTION
+==========================================*/
+
+.order-action {
+
+    margin-top: 25px;
+
+    padding-bottom: 30px;
+
+}
+
+.order-action .btn {
+
+    width: 100%;
+
+    height: 54px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 8px;
+
+}
+
+
+/*==========================================
+    RESPONSIVE
+==========================================*/
+
+@media (max-width: 480px) {
+
+    .order-success h1 {
+
+        font-size: 1.4rem;
+
+    }
+
+    .order-number-card strong {
+
+        font-size: 1.5rem;
+
+    }
+
+}

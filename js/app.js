@@ -6,6 +6,84 @@ const popularFoods = document.getElementById("popularFoods");
 const cartBadge = document.getElementById("cartBadge");
 
 /*==========================================
+    TABLE SESSION
+==========================================*/
+
+function initializeTableSession() {
+
+    const urlParams =
+        new URLSearchParams(window.location.search);
+
+    const tableFromQR =
+        urlParams.get("table");
+
+
+    /*------------------------------------------
+        USER SCANNED QR
+    ------------------------------------------*/
+
+    if (tableFromQR) {
+
+        /*
+            Pastikan nombor meja adalah nombor
+        */
+
+        const tableNumber =
+            Number(tableFromQR);
+
+
+        /*
+            Pastikan nombor meja sah
+        */
+
+        if (
+            Number.isInteger(tableNumber) &&
+            tableNumber > 0
+        ) {
+
+            localStorage.setItem(
+                "activeTable",
+                tableNumber
+            );
+
+        }
+
+
+        /*
+            Buang ?table=1 daripada URL
+            selepas meja disimpan
+        */
+
+        window.history.replaceState(
+            {},
+            document.title,
+            window.location.pathname
+        );
+
+    }
+
+}
+
+
+/*==========================================
+    GET ACTIVE TABLE
+==========================================*/
+
+function getActiveTable() {
+
+    return localStorage.getItem(
+        "activeTable"
+    );
+
+}
+
+
+/*==========================================
+    INITIALIZE TABLE
+==========================================*/
+
+initializeTableSession();
+/*==========================================
     POPULAR MENU
 ==========================================*/
 

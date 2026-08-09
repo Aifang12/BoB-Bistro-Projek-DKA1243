@@ -1,0 +1,642 @@
+/*==========================================
+    CHECKOUT HEADER
+==========================================*/
+
+.checkout-header {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding: 20px 0;
+
+}
+
+.checkout-header h1 {
+
+    font-size: 1.5rem;
+
+    font-weight: 600;
+
+}
+
+.checkout-header-icon {
+
+    width: 45px;
+
+    height: 45px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    background: #fff;
+
+    border-radius: 12px;
+
+    box-shadow: var(--shadow-sm);
+
+}
+
+.checkout-header-icon i {
+
+    font-size: 1.3rem;
+
+    color: var(--primary-color);
+
+}
+
+
+/*==========================================
+    CHECKOUT SECTION
+==========================================*/
+
+.checkout-section {
+
+    margin-top: 20px;
+
+}
+
+.checkout-title {
+
+    font-size: 1.1rem;
+
+    font-weight: 700;
+
+    margin-bottom: 15px;
+
+}
+
+
+/*==========================================
+    CHECKOUT ITEMS
+==========================================*/
+
+.checkout-items {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 12px;
+
+}
+
+.checkout-item {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 12px;
+
+    background: #fff;
+
+    border-radius: 14px;
+
+    box-shadow: var(--shadow-sm);
+
+}
+
+.checkout-item-image {
+
+    width: 65px;
+
+    height: 65px;
+
+    flex-shrink: 0;
+
+    border-radius: 12px;
+
+    overflow: hidden;
+
+}
+
+.checkout-item-image img {
+
+    width: 100%;
+
+    height: 100%;
+
+    object-fit: cover;
+
+}
+
+.checkout-item-info {
+
+    flex: 1;
+
+}
+
+.checkout-item-name {
+
+    font-size: .95rem;
+
+    font-weight: 600;
+
+    margin-bottom: 5px;
+
+}
+
+.checkout-item-quantity {
+
+    color: var(--text-light);
+
+    font-size: .8rem;
+
+}
+
+.checkout-item-total {
+
+    color: var(--primary-color);
+
+    font-size: .95rem;
+
+    font-weight: 700;
+
+}
+
+
+/*==========================================
+    FORM
+==========================================*/
+
+.form-group {
+
+    background: #fff;
+
+    padding: 18px;
+
+    border-radius: 16px;
+
+    box-shadow: var(--shadow-sm);
+
+}
+
+.form-group label {
+
+    display: block;
+
+    font-size: .9rem;
+
+    font-weight: 600;
+
+    margin-bottom: 10px;
+
+}
+
+.input-wrapper {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 12px 14px;
+
+    background: #f8f8f8;
+
+    border-radius: 12px;
+
+}
+
+.input-wrapper i {
+
+    color: var(--primary-color);
+
+}
+
+.input-wrapper input {
+
+    width: 100%;
+
+    border: none;
+
+    outline: none;
+
+    background: transparent;
+
+    font-size: .95rem;
+
+}
+
+.form-group textarea {
+
+    width: 100%;
+
+    min-height: 100px;
+
+    padding: 12px 14px;
+
+    border: 1px solid #e5e5e5;
+
+    border-radius: 12px;
+
+    background: #f8f8f8;
+
+    resize: vertical;
+
+    font-size: .95rem;
+
+    font-family: inherit;
+
+    outline: none;
+
+}
+
+.form-group textarea:focus {
+
+    border-color: var(--primary-color);
+
+}
+
+.input-help {
+
+    display: block;
+
+    margin-top: 8px;
+
+    color: var(--text-light);
+
+    font-size: .75rem;
+
+}
+
+
+/*==========================================
+    PAYMENT
+==========================================*/
+
+.payment-options {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 12px;
+
+}
+
+.payment-option {
+
+    cursor: pointer;
+
+}
+
+.payment-option input {
+
+    display: none;
+
+}
+
+.payment-card {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 14px;
+
+    padding: 15px;
+
+    background: #fff;
+
+    border: 2px solid transparent;
+
+    border-radius: 16px;
+
+    box-shadow: var(--shadow-sm);
+
+    transition: var(--transition);
+
+}
+
+.payment-icon {
+
+    width: 45px;
+
+    height: 45px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 12px;
+
+    background: #f8eeee;
+
+    color: var(--primary-color);
+
+}
+
+.payment-icon i {
+
+    font-size: 1.2rem;
+
+}
+
+.payment-info {
+
+    flex: 1;
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 4px;
+
+}
+
+.payment-info strong {
+
+    font-size: .95rem;
+
+}
+
+.payment-info span {
+
+    color: var(--text-light);
+
+    font-size: .75rem;
+
+}
+
+.payment-check {
+
+    color: #ddd;
+
+    font-size: 1.2rem;
+
+}
+
+.payment-option input:checked
++ .payment-card {
+
+    border-color: var(--primary-color);
+
+    background: #fffafa;
+
+}
+
+.payment-option input:checked
++ .payment-card
+.payment-check {
+
+    color: var(--primary-color);
+
+}
+
+
+/*==========================================
+    TOTAL
+==========================================*/
+
+.checkout-total {
+
+    margin-top: 30px;
+
+    padding: 18px;
+
+    background: #fff;
+
+    border-radius: 16px;
+
+    box-shadow: var(--shadow-sm);
+
+}
+
+.checkout-total-row {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    margin-bottom: 10px;
+
+    font-size: .9rem;
+
+}
+
+.final-total {
+
+    margin-bottom: 0;
+
+    padding-top: 12px;
+
+    border-top: 1px solid var(--border-color);
+
+}
+
+.final-total strong:last-child {
+
+    color: var(--primary-color);
+
+    font-size: 1.3rem;
+
+}
+
+
+/*==========================================
+    ACTION
+==========================================*/
+
+.checkout-action {
+
+    position: sticky;
+
+    bottom: 0;
+
+    margin-top: 20px;
+
+    padding: 16px 0
+        calc(16px + env(safe-area-inset-bottom));
+
+    background: rgba(255,255,255,.97);
+
+    border-top: 1px solid rgba(0,0,0,.08);
+
+    box-shadow: 0 -4px 18px rgba(0,0,0,.08);
+
+    z-index: 50;
+
+}
+
+#placeOrderBtn {
+
+    width: 100%;
+
+    height: 54px;
+
+}
+
+/*==========================================
+    LOCKED TABLE
+==========================================*/
+
+.table-locked {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 14px;
+
+    padding: 16px;
+
+    background: #fff;
+
+    border-radius: 16px;
+
+    border: 1px solid var(--border-color);
+
+    box-shadow: var(--shadow-sm);
+
+}
+
+
+/*==========================================
+    TABLE ICON
+==========================================*/
+
+.table-icon {
+
+    width: 45px;
+
+    height: 45px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    background: #fff0f0;
+
+    color: var(--primary-color);
+
+    border-radius: 12px;
+
+    flex-shrink: 0;
+
+}
+
+.table-icon i {
+
+    font-size: 1.2rem;
+
+}
+
+
+/*==========================================
+    TABLE INFO
+==========================================*/
+
+.table-info {
+
+    flex: 1;
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 4px;
+
+}
+
+.table-info span {
+
+    color: var(--text-light);
+
+    font-size: .8rem;
+
+}
+
+.table-info strong {
+
+    font-size: 1rem;
+
+}
+
+
+/*==========================================
+    LOCK
+==========================================*/
+
+.table-lock {
+
+    width: 36px;
+
+    height: 36px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    background: #f2f2f2;
+
+    color: var(--text-light);
+
+    border-radius: 10px;
+
+}
+
+.table-lock i {
+
+    font-size: .9rem;
+
+}
+
+
+/*==========================================
+    TABLE NOTICE
+==========================================*/
+
+.table-notice {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 6px;
+
+    margin-top: 8px;
+
+    color: var(--text-light);
+
+    font-size: .75rem;
+
+}
+
+.table-notice i {
+
+    color: var(--primary-color);
+
+}
+/*==========================================
+    RESPONSIVE
+==========================================*/
+
+@media (max-width: 480px) {
+
+    .checkout-item-image {
+
+        width: 60px;
+
+        height: 60px;
+
+    }
+
+}

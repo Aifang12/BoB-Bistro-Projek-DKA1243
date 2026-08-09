@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="ms">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Checkout | B@Bistro</title>
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/style.css">
+
+    <link rel="stylesheet" href="css/pages/checkout.css">
+
+</head>
+
+<body>
+
+    <!--==========================================
+        HEADER
+    ===========================================-->
+
+    <header class="checkout-header container">
+
+        <a href="cart.html" class="back-btn">
+
+            <i class="bi bi-arrow-left"></i>
+
+        </a>
+
+        <h1>Checkout</h1>
+
+        <span class="checkout-header-icon">
+
+            <i class="bi bi-receipt"></i>
+
+        </span>
+
+    </header>
+
+
+    <!--==========================================
+        MAIN
+    ===========================================-->
+
+    <main class="container">
+
+        <!--======================================
+            ORDER SUMMARY
+        =======================================-->
+
+        <section class="checkout-section">
+
+            <h2 class="checkout-title">
+
+                Ringkasan Pesanan
+
+            </h2>
+
+            <div id="checkoutItems" class="checkout-items">
+
+                <!-- Item akan dijana oleh checkout.js -->
+
+            </div>
+
+        </section>
+
+
+        <!--==========================================
+            TABLE
+        ===========================================-->
+
+        <section class="checkout-section">
+
+            <h2 class="checkout-title">
+                Meja
+            </h2>
+
+            <div class="table-locked">
+
+                <div class="table-icon">
+
+                    <i class="bi bi-table"></i>
+
+                </div>
+
+                <div class="table-info">
+
+                    <span>
+                        Nombor Meja
+                    </span>
+
+                    <strong id="checkoutTable">
+                        Meja -
+                    </strong>
+
+                </div>
+
+                <div class="table-lock">
+
+                    <i class="bi bi-lock-fill"></i>
+
+                </div>
+
+            </div>
+
+            <p class="table-notice">
+
+                <i class="bi bi-qr-code"></i>
+
+                Meja ditetapkan secara automatik
+                melalui QR Code.
+
+            </p>
+
+        </section>
+
+
+        <!--======================================
+            ORDER NOTES
+        =======================================-->
+
+        <section class="checkout-section">
+
+            <h2 class="checkout-title">
+                Pesanan Tambahan
+            </h2>
+
+            <div class="form-group">
+
+                <!-- <label for="orderNotes">
+                    Komen Tambahan
+                </label> -->
+
+                <textarea id="orderNotes" rows="4"
+                    placeholder="Contoh: Nasi goreng kurang pedas, extra sambal di sisi..."></textarea>
+
+                <small class="input-help">
+                    Sila nyatakan sebarang permintaan khas untuk makanan anda.
+                </small>
+
+            </div>
+
+        </section>
+
+
+        <!--======================================
+            PAYMENT
+        =======================================-->
+
+        <section class="checkout-section">
+
+            <h2 class="checkout-title">
+                Kaedah Pembayaran
+            </h2>
+
+            <div class="payment-options">
+
+                <!-- FPX -->
+
+                <label class="payment-option">
+
+                    <input type="radio" name="paymentMethod" value="fpx" checked>
+
+                    <div class="payment-card">
+
+                        <div class="payment-icon">
+
+                            <i class="bi bi-credit-card-2-front"></i>
+
+                        </div>
+
+                        <div class="payment-info">
+
+                            <strong>
+                                FPX
+                            </strong>
+
+                            <span>
+                                Pembayaran melalui FPX
+                            </span>
+
+                        </div>
+
+                        <i class="bi bi-check-circle-fill payment-check"></i>
+
+                    </div>
+
+                </label>
+
+
+                <!-- ONLINE BANKING -->
+
+                <label class="payment-option">
+
+                    <input type="radio" name="paymentMethod" value="online-banking">
+
+                    <div class="payment-card">
+
+                        <div class="payment-icon">
+
+                            <i class="bi bi-bank"></i>
+
+                        </div>
+
+                        <div class="payment-info">
+
+                            <strong>
+                                Online Banking
+                            </strong>
+
+                            <span>
+                                Pembayaran melalui perbankan dalam talian
+                            </span>
+
+                        </div>
+
+                        <i class="bi bi-check-circle-fill payment-check"></i>
+
+                    </div>
+
+                </label>
+
+
+                <!-- CASH -->
+
+                <label class="payment-option">
+
+                    <input type="radio" name="paymentMethod" value="cash">
+
+                    <div class="payment-card">
+
+                        <div class="payment-icon">
+
+                            <i class="bi bi-cash-stack"></i>
+
+                        </div>
+
+                        <div class="payment-info">
+
+                            <strong>
+                                Tunai di Kaunter
+                            </strong>
+
+                            <span>
+                                Bayar secara tunai di kaunter
+                            </span>
+
+                        </div>
+
+                        <i class="bi bi-check-circle-fill payment-check"></i>
+
+                    </div>
+
+                </label>
+
+            </div>
+
+        </section>
+        <!--======================================
+            TOTAL
+        =======================================-->
+
+        <section class="checkout-total">
+
+            <div class="checkout-total-row">
+
+                <span>
+                    Jumlah Item
+                </span>
+
+                <span id="checkoutItemCount">
+                    0
+                </span>
+
+            </div>
+
+            <div class="checkout-total-row final-total">
+
+                <strong>
+                    Jumlah Bayaran
+                </strong>
+
+                <strong id="checkoutTotal">
+                    RM 0.00
+                </strong>
+
+            </div>
+
+        </section>
+
+
+        <!--======================================
+            ACTION
+        =======================================-->
+
+        <section class="checkout-action">
+
+            <button id="placeOrderBtn" class="btn btn-primary" type="button">
+
+                <i class="bi bi-check-circle"></i>
+
+                Buat Tempahan
+
+            </button>
+
+        </section>
+
+    </main>
+
+
+    <!--==========================================
+        JAVASCRIPT
+    ===========================================-->
+
+    <script src="js/data.js"></script>
+
+    <script src="js/checkout.js"></script>
+
+</body>
+
+</html>
