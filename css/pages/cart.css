@@ -1,0 +1,358 @@
+/*==========================================
+    CART HEADER
+==========================================*/
+
+.cart-header {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding: 20px 0;
+
+}
+
+.cart-header h1 {
+
+    font-size: 1.5rem;
+
+    font-weight: 600;
+
+}
+
+.cart-header-icon {
+
+    width: 45px;
+
+    height: 45px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    background: #fff;
+
+    border-radius: 12px;
+
+    box-shadow: var(--shadow-sm);
+
+}
+
+.cart-header-icon i {
+
+    font-size: 1.3rem;
+
+    color: var(--primary-color);
+
+}
+
+
+/*==========================================
+    CART SECTION
+==========================================*/
+
+.cart-section {
+
+    margin-top: 10px;
+
+    padding-bottom: 30px;
+
+}
+
+
+/*==========================================
+    CART ITEM
+==========================================*/
+
+.cart-item {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 15px;
+
+    background: #fff;
+
+    padding: 14px;
+
+    margin-bottom: 15px;
+
+    border-radius: 16px;
+
+    box-shadow: var(--shadow-sm);
+
+}
+
+.cart-item-image {
+
+    width: 85px;
+
+    height: 85px;
+
+    flex-shrink: 0;
+
+    border-radius: 14px;
+
+    overflow: hidden;
+
+}
+
+.cart-item-image img {
+
+    width: 100%;
+
+    height: 100%;
+
+    object-fit: cover;
+
+}
+
+.cart-item-info {
+
+    flex: 1;
+
+    min-width: 0;
+
+}
+
+.cart-item-name {
+
+    font-size: 1rem;
+
+    font-weight: 600;
+
+    margin-bottom: 5px;
+
+}
+
+.cart-item-price {
+
+    color: var(--primary-color);
+
+    font-size: .9rem;
+
+    font-weight: 600;
+
+}
+
+
+/*==========================================
+    CART QUANTITY
+==========================================*/
+
+.cart-quantity {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    margin-top: 10px;
+
+}
+
+.cart-quantity button {
+
+    width: 30px;
+
+    height: 30px;
+
+    border: none;
+
+    border-radius: 8px;
+
+    background: var(--primary-color);
+
+    color: white;
+
+    cursor: pointer;
+
+}
+
+.cart-quantity span {
+
+    min-width: 25px;
+
+    text-align: center;
+
+    font-weight: 600;
+
+}
+
+
+/*==========================================
+    REMOVE BUTTON
+==========================================*/
+
+.remove-cart-btn {
+
+    width: 35px;
+
+    height: 35px;
+
+    border: none;
+
+    background: transparent;
+
+    color: #999;
+
+    cursor: pointer;
+
+    font-size: 1.1rem;
+
+}
+
+.remove-cart-btn:hover {
+
+    color: var(--primary-color);
+
+}
+
+
+/*==========================================
+    EMPTY CART
+==========================================*/
+
+.empty-cart {
+
+    min-height: 55vh;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    text-align: center;
+
+}
+
+.empty-cart i {
+
+    font-size: 4rem;
+
+    color: var(--primary-color);
+
+    margin-bottom: 15px;
+
+}
+
+.empty-cart h2 {
+
+    font-size: 1.3rem;
+
+    margin-bottom: 8px;
+
+}
+
+.empty-cart p {
+
+    color: var(--text-light);
+
+    margin-bottom: 20px;
+
+}
+
+
+/*==========================================
+    CART SUMMARY
+==========================================*/
+
+.cart-summary {
+
+    position: sticky;
+
+    bottom: 0;
+
+    background: rgba(255,255,255,.97);
+
+    padding: 18px 0 calc(18px + env(safe-area-inset-bottom));
+
+    border-top: 1px solid rgba(0,0,0,.08);
+
+    box-shadow: 0 -4px 18px rgba(0,0,0,.08);
+
+    z-index: 50;
+
+    border-radius: 20px;
+
+    padding-left: 10px;
+    
+    padding-right: 10px;
+
+}
+
+.summary-row {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    margin-bottom: 10px;
+
+}
+
+.total-row {
+
+    padding-top: 8px;
+
+    margin-bottom: 15px;
+
+}
+
+.total-row strong {
+
+    color: var(--primary-color);
+
+    font-size: 1.3rem;
+
+}
+
+#checkoutBtn {
+
+    width: 100%;
+
+    height: 52px;
+
+}
+
+
+/*==========================================
+    RESPONSIVE
+==========================================*/
+
+@media (max-width: 480px) {
+
+    .cart-item {
+
+        gap: 10px;
+
+        padding: 12px;
+
+    }
+
+    .cart-item-image {
+
+        width: 70px;
+
+        height: 70px;
+
+    }
+
+    .cart-item-name {
+
+        font-size: .9rem;
+
+    }
+
+}

@@ -2,6 +2,7 @@
     PRODUCT PAGE
 ==========================================*/
 
+
 /*==========================================
     GET PRODUCT ID
 ==========================================*/
@@ -51,7 +52,7 @@ const addToCartBtn =
     document.getElementById("addToCartBtn");
 
 const cartBadge =
-    document.querySelector(".cart-badge");
+    document.getElementById("cartBadge");
 
 
 /*==========================================
@@ -59,6 +60,14 @@ const cartBadge =
 ==========================================*/
 
 let quantity = 1;
+
+
+/*==========================================
+    FIND PRODUCT
+==========================================*/
+
+const product =
+    foods.find(food => food.id === productId);
 
 
 /*==========================================
@@ -78,50 +87,56 @@ function updateTotalPrice() {
 
     }
 
+    const total =
+        product.price * quantity;
+
     totalPriceElement.textContent =
-        `RM ${(product.price * quantity).toFixed(2)}`;
+        `RM ${total.toFixed(2)}`;
 
 }
 
 
 /*==========================================
-    FIND PRODUCT
+    LOAD PRODUCT
 ==========================================*/
 
-const product =
-    foods.find(food => food.id === productId);
+function loadProduct() {
+
+    if (!product) {
+
+        productName.textContent =
+            "Produk tidak dijumpai.";
+
+        productDescription.textContent =
+            "Maaf, produk yang anda cari tidak tersedia.";
+
+        if (addToCartBtn) {
+
+            addToCartBtn.disabled = true;
+
+        }
+
+        updateTotalPrice();
+
+        return;
+
+    }
 
 
-/*==========================================
-    PRODUCT NOT FOUND
-==========================================*/
-
-if (!product) {
-
-    productName.textContent =
-        "Produk tidak dijumpai.";
-
-    productDescription.textContent =
-        "Maaf, produk yang anda cari tidak tersedia.";
-
-    addToCartBtn.disabled = true;
-
-    updateTotalPrice();
-
-}
-
-
-/*==========================================
-    DISPLAY PRODUCT
-==========================================*/
-
-else {
+    /*------------------------------------------
+        PRODUCT IMAGE
+    ------------------------------------------*/
 
     productImage.src =
         product.image;
 
     productImage.alt =
         product.name;
+
+
+    /*------------------------------------------
+        PRODUCT INFORMATION
+    ------------------------------------------*/
 
     productCategory.textContent =
         product.category;
@@ -137,6 +152,16 @@ else {
 
     productDescription.textContent =
         product.description;
+
+
+    /*------------------------------------------
+        INITIAL TOTAL
+    ------------------------------------------*/
+
+    quantity = 1;
+
+    quantityElement.textContent =
+        quantity;
 
     updateTotalPrice();
 
@@ -244,10 +269,36 @@ addToCartBtn.addEventListener("click", () => {
 
 
     /*------------------------------------------
-        UPDATE BADGE
+        UPDATE CART BADGE
     ------------------------------------------*/
 
     updateCartBadge();
+
+
+    /*------------------------------------------
+        BUTTON FEEDBACK
+    ------------------------------------------*/
+
+    const originalHTML =
+        addToCartBtn.innerHTML;
+
+
+    addToCartBtn.innerHTML = `
+        <i class="bi bi-check-circle-fill"></i>
+        Ditambah
+    `;
+
+
+    /*------------------------------------------
+        RESET BUTTON
+    ------------------------------------------*/
+
+    setTimeout(() => {
+
+        addToCartBtn.innerHTML =
+            originalHTML;
+
+    }, 1500);
 
 
     /*------------------------------------------
@@ -260,25 +311,6 @@ addToCartBtn.addEventListener("click", () => {
         quantity;
 
     updateTotalPrice();
-
-
-    /*------------------------------------------
-        BUTTON FEEDBACK
-    ------------------------------------------*/
-
-    const originalText =
-        addToCartBtn.textContent;
-
-    addToCartBtn.textContent =
-        "Ditambah ke Bakul ✓";
-
-
-    setTimeout(() => {
-
-        addToCartBtn.textContent =
-            originalText;
-
-    }, 1500);
 
 });
 
@@ -312,9 +344,12 @@ function updateCartBadge() {
         totalItems;
 
 }
+
+
 /*==========================================
     INITIALIZE
 ==========================================*/
 
+loadProduct();
+
 updateCartBadge();
-updateTotalPrice();
