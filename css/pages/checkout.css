@@ -395,6 +395,137 @@
 
 }
 
+.ewallet-providers {
+
+    margin-top: 16px;
+
+    padding: 18px;
+
+    background: #fff;
+
+    border-radius: 16px;
+
+    box-shadow: var(--shadow-sm);
+
+}
+
+.ewallet-providers.hidden {
+
+    display: none;
+
+}
+
+.payment-subtitle {
+
+    margin-bottom: 14px;
+
+    color: var(--text-light);
+
+    font-size: .85rem;
+
+}
+
+.provider-grid {
+
+    display: grid;
+
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    gap: 12px;
+
+}
+
+.provider-option {
+
+    cursor: pointer;
+
+}
+
+.provider-option input {
+
+    display: none;
+
+}
+
+.provider-card {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 14px;
+
+    border-radius: 14px;
+
+    background: #fdf8f7;
+
+    border: 2px solid transparent;
+
+    transition: var(--transition);
+
+}
+
+.provider-icon {
+
+    width: 40px;
+
+    height: 40px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 12px;
+
+    background: var(--primary-color-light);
+
+    color: var(--primary-color);
+
+}
+
+.provider-icon i {
+
+    font-size: 1rem;
+
+}
+
+.provider-info {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 4px;
+
+}
+
+.provider-info strong {
+
+    font-size: .92rem;
+
+}
+
+.provider-info span {
+
+    color: var(--text-light);
+
+    font-size: .72rem;
+
+}
+
+.provider-option input:checked
++ .provider-card {
+
+    border-color: var(--primary-color);
+
+    background: #fff;
+
+}
+
 
 /*==========================================
     TOTAL

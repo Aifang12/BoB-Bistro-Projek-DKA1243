@@ -25,6 +25,9 @@ const placeOrderBtn =
 const checkoutTable =
     document.getElementById("checkoutTable");
 
+const eWalletProviders =
+    document.getElementById("eWalletProviders");
+
 
 /*==========================================
     GET ACTIVE TABLE
@@ -257,6 +260,70 @@ function getPaymentMethod() {
 }
 
 
+function getEWalletProvider() {
+
+    const selected =
+        document.querySelector(
+            'input[name="eWalletProvider"]:checked'
+        );
+
+
+    return selected
+        ? selected.value
+        : null;
+
+}
+
+
+function setEWalletVisibility() {
+
+    if (!eWalletProviders) {
+
+        return;
+
+    }
+
+
+    const paymentMethod =
+        getPaymentMethod();
+
+
+    if (paymentMethod === "e-wallet") {
+
+        eWalletProviders.classList.remove("hidden");
+
+    } else {
+
+        eWalletProviders.classList.add("hidden");
+
+    }
+
+}
+
+
+function initializePaymentListeners() {
+
+    const paymentMethodInputs =
+        document.querySelectorAll(
+            'input[name="paymentMethod"]'
+        );
+
+
+    paymentMethodInputs.forEach(input => {
+
+        input.addEventListener(
+            "change",
+            setEWalletVisibility
+        );
+
+    });
+
+
+    setEWalletVisibility();
+
+}
+
+
 /*==========================================
     GENERATE ORDER ID
 ==========================================*/
@@ -330,11 +397,30 @@ placeOrderBtn.addEventListener(
         const paymentMethod =
             getPaymentMethod();
 
+        const paymentProvider =
+            paymentMethod === "e-wallet"
+                ? getEWalletProvider()
+                : null;
+
 
         if (!paymentMethod) {
 
             alert(
                 "Sila pilih kaedah pembayaran."
+            );
+
+            return;
+
+        }
+
+
+        if (
+            paymentMethod === "e-wallet" &&
+            !paymentProvider
+        ) {
+
+            alert(
+                "Sila pilih jenis e-wallet."
             );
 
             return;
@@ -389,6 +475,9 @@ placeOrderBtn.addEventListener(
 
             paymentMethod:
                 paymentMethod,
+
+            paymentProvider:
+                paymentProvider,
 
             notes:
                 orderNotes
@@ -448,5 +537,7 @@ if (checkTableSession()) {
     loadActiveTable();
 
     loadCheckout();
+
+    initializePaymentListeners();
 
 }

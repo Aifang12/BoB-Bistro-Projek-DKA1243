@@ -290,7 +290,8 @@ function loadOrderInformation() {
 
     orderPaymentElement.textContent =
         formatPaymentMethod(
-            currentOrder.paymentMethod
+            currentOrder.paymentMethod,
+            currentOrder.paymentProvider
         );
 
 
@@ -318,14 +319,54 @@ function loadOrderInformation() {
     FORMAT PAYMENT METHOD
 ==========================================*/
 
-function formatPaymentMethod(method) {
+function formatEWalletProvider(provider) {
+
+    switch (provider) {
+
+        case "touchngo":
+
+            return "Touch N Go";
+
+
+        case "googlepay":
+
+            return "Google Pay";
+
+
+        case "applepay":
+
+            return "Apple Pay";
+
+
+        case "boost":
+
+            return "Boost";
+
+
+        default:
+
+            return "E-Wallet";
+
+    }
+
+}
+
+
+function formatPaymentMethod(method, provider) {
 
     switch (method) {
+
+        case "e-wallet":
+
+            return `E-Wallet (${formatEWalletProvider(provider)})`;
+
 
         case "fpx":
 
             return "FPX";
 
+
+        case "online-banking":
 
         case "online":
 
