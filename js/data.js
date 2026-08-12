@@ -89,23 +89,83 @@ description:"Minuman coklat pekat panas atau ais yang dibuat daripada coklat art
 
 //Dessert
 {
-id:4,
-name:"Mee Goreng",
-price:11,
+id:9,
+name:"Classic Crème Brûlée",
+price:24,
 rating:4.7,
 category:"Dessert",
-image:"images/foods/makanan.png",
-description:"Mee goreng dengan ayam dan sayuran segar."
+image:"images/foods/desserts/Classic Crème Brûlée.png",
+description:"Kastard vanila lembut dengan lapisan gula karamel rangup yang dibakar di bahagian atas."
+},
+
+{
+id:10,
+name:"Warm Apple Tarte Tatin",
+price:26,
+rating:4.8,
+category:"Dessert",
+image:"images/foods/desserts/Warm Apple Tarte Tatin.png",
+description:"Pai epal karamel gaya Perancis dengan pastri rangup, dihidangkan bersama gelato vanila."
+},
+
+{
+id:11,
+name:"Dark Chocolate Mousse",
+price:22,
+rating:4.9,
+category:"Dessert",
+image:"images/foods/desserts/Dark Chocolate Mousse.png",
+description:"Mousse coklat gelap 70 peratus yang kaya dan gebu, ditaburi garam laut dan krim chantilly."
+},
+
+{
+id:12,
+name:"Churros Sos Coklat",
+price:18,
+rating:4.6,
+category:"Dessert",
+image:"images/foods/desserts/Churros Sos Coklat.png",
+description:"Churros goreng panas dan rangup ditabur gula kayu manis, dihidangkan bersama sos celupan coklat pekat."
 },
 
 //Snek
 {
-id:4,
-name:"Mee Goreng",
-price:11,
+id:13,
+name:"French Onion Soup",
+price:14,
+rating:5.0,
+category:"Snek",
+image:"images/foods/snack/French Onion Soup.png",
+description:"Sup bawang Perancis kaya rasa, dihidangkan bersama roti bakar dan keju Gruyère leleh."
+},
+
+{
+id:14,
+name:"Whipped Ricotta Sourdough",
+price:32,
 rating:4.7,
 category:"Snek",
-image:"images/foods/makanan.png",
-description:"Mee goreng dengan ayam dan sayuran segar."
-}
+image:"images/foods/snack/Whipped Ricotta Sourdough.png",
+description:"Perancis dibakar dalam mentega bawang putih dan herba segar."
+},
+
+{
+id:15,
+name:"Escargots à la Bourguignonne",
+price:38,
+rating:4.6,
+category:"Snek",
+image:"images/foods/snack/Escargots à la Bourguignonne.png",
+description:"Keju ricotta gebu disiram madu dan minyak zaitun, dihidangkan bersama roti sourdough bakar."
+},
+
+{
+id:16,
+name:"Crispy Truffle Fries",
+price:22,
+rating:4.7,
+category:"Snek",
+image:"images/foods/snack/Crispy Truffle Fries.png",
+description:"Kentang goreng rangup ditaburi minyak truffle, keju parmesan, dan herba parsley."
+},
 ];
