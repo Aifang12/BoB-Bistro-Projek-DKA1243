@@ -50,6 +50,8 @@
 
     <main class="container">
 
+        <p id="checkoutError" class="checkout-error" role="alert" hidden></p>
+
         <!--======================================
             ORDER SUMMARY
         =======================================-->
@@ -161,28 +163,28 @@
 
             <div class="payment-options">
 
-                <!-- E-WALLET -->
+                <!-- FPX -->
 
                 <label class="payment-option">
 
-                    <input type="radio" name="paymentMethod" value="e-wallet" checked>
+                    <input type="radio" name="paymentMethod" value="FPX">
 
                     <div class="payment-card">
 
                         <div class="payment-icon">
 
-                            <i class="bi bi-wallet2"></i>
+                            <i class="bi bi-credit-card"></i>
 
                         </div>
 
                         <div class="payment-info">
 
                             <strong>
-                                E-Wallet
+                                FPX
                             </strong>
 
                             <span>
-                                Pilih e-wallet untuk pembayaran mudah
+                                Pembayaran dalam talian melalui FPX
                             </span>
 
                         </div>
@@ -193,136 +195,11 @@
 
                 </label>
 
-                <div class="ewallet-providers" id="eWalletProviders">
-
-                    <p class="payment-subtitle">
-                        Pilih jenis e-wallet
-                    </p>
-
-                    <div class="provider-grid">
-
-                        <label class="provider-option">
-
-                            <input type="radio" name="eWalletProvider" value="touchngo" checked>
-
-                            <div class="provider-card">
-
-                                <div class="provider-icon">
-
-                                    <i class="bi bi-wallet2"></i>
-
-                                </div>
-
-                                <div class="provider-info">
-
-                                    <strong>
-                                        Touch N Go
-                                    </strong>
-
-                                    <span>
-                                        e-wallet Malaysia
-                                    </span>
-
-                                </div>
-
-                            </div>
-
-                        </label>
-
-                        <label class="provider-option">
-
-                            <input type="radio" name="eWalletProvider" value="googlepay">
-
-                            <div class="provider-card">
-
-                                <div class="provider-icon">
-
-                                    <i class="bi bi-phone"></i>
-
-                                </div>
-
-                                <div class="provider-info">
-
-                                    <strong>
-                                        Google Pay
-                                    </strong>
-
-                                    <span>
-                                        Bayaran mudah melalui Google
-                                    </span>
-
-                                </div>
-
-                            </div>
-
-                        </label>
-
-                        <label class="provider-option">
-
-                            <input type="radio" name="eWalletProvider" value="applepay">
-
-                            <div class="provider-card">
-
-                                <div class="provider-icon">
-
-                                    <i class="bi bi-phone"></i>
-
-                                </div>
-
-                                <div class="provider-info">
-
-                                    <strong>
-                                        Apple Pay
-                                    </strong>
-
-                                    <span>
-                                        Bayar dengan Apple Pay
-                                    </span>
-
-                                </div>
-
-                            </div>
-
-                        </label>
-
-                        <label class="provider-option">
-
-                            <input type="radio" name="eWalletProvider" value="boost">
-
-                            <div class="provider-card">
-
-                                <div class="provider-icon">
-
-                                    <i class="bi bi-currency-dollar"></i>
-
-                                </div>
-
-                                <div class="provider-info">
-
-                                    <strong>
-                                        Boost
-                                    </strong>
-
-                                    <span>
-                                        Bayaran e-wallet Boost
-                                    </span>
-
-                                </div>
-
-                            </div>
-
-                        </label>
-
-                    </div>
-
-                </div>
-
-
                 <!-- ONLINE BANKING -->
 
                 <label class="payment-option">
 
-                    <input type="radio" name="paymentMethod" value="online-banking">
+                    <input type="radio" name="paymentMethod" value="Online Banking">
 
                     <div class="payment-card">
 
@@ -355,7 +232,7 @@
 
                 <label class="payment-option">
 
-                    <input type="radio" name="paymentMethod" value="cash">
+                    <input type="radio" name="paymentMethod" value="Tunai" checked>
 
                     <div class="payment-card">
 
@@ -384,6 +261,10 @@
                 </label>
 
             </div>
+
+            <p class="input-help">
+                FPX dan Online Banking direkod untuk pengesahan manual. Tiada caj dalam talian diproses pada laman ini.
+            </p>
 
         </section>
         <!--======================================

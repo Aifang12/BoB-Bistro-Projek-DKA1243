@@ -1,528 +1,171 @@
-/*==========================================
-    ORDER STATUS PAGE
-==========================================*/
+const orderIdElement = document.getElementById('orderId');
+const orderTableElement = document.getElementById('orderTable');
+const orderPaymentElement = document.getElementById('orderPayment');
+const orderNotesElement = document.getElementById('orderNotes');
+const orderTotalElement = document.getElementById('orderTotal');
+const orderItemsElement = document.getElementById('orderItems');
+const statusIcon = document.getElementById('statusIcon');
+const statusTitle = document.getElementById('statusTitle');
+const statusDescription = document.getElementById('statusDescription');
+const cartBadge = document.getElementById('cartBadge');
+const orderNumber = new URLSearchParams(window.location.search).get('order');
+const successHeading = document.querySelector('.success-section h1');
+const orderPageMessage = document.getElementById('orderPageMessage');
 
-
-/*==========================================
-    DOM ELEMENTS
-==========================================*/
-
-const orderIdElement =
-    document.getElementById("orderId");
-
-const orderTableElement =
-    document.getElementById("orderTable");
-
-const orderPaymentElement =
-    document.getElementById("orderPayment");
-
-const orderNotesElement =
-    document.getElementById("orderNotes");
-
-const orderTotalElement =
-    document.getElementById("orderTotal");
-
-const orderItemsElement =
-    document.getElementById("orderItems");
-
-const statusIcon =
-    document.getElementById("statusIcon");
-
-const statusTitle =
-    document.getElementById("statusTitle");
-
-const statusDescription =
-    document.getElementById("statusDescription");
-
-const cartBadge =
-    document.getElementById("cartBadge");
-
-
-/*==========================================
-    GET ORDER
-==========================================*/
-
-const currentOrder =
-    JSON.parse(
-        localStorage.getItem("currentOrder")
-    );
-
-
-/*==========================================
-    STATUS DATA
-==========================================*/
-
-const orderStatuses = [
-
-    {
-        name: "Menunggu",
-
-        description:
-            "Pesanan anda telah diterima.",
-
-        icon:
-            "bi-clock"
+const orderStatuses = {
+    Menunggu: {
+        description: 'Tempahan anda telah diterima.',
+        icon: 'bi-clock'
     },
-
-    {
-        name: "Sedang Disediakan",
-
-        description:
-            "Pesanan sedang disediakan.",
-
-        icon:
-            "bi-fire"
+    'Sedang Disediakan': {
+        description: 'Tempahan anda sedang disediakan.',
+        icon: 'bi-fire'
     },
-
-    {
-        name: "Sedia Diambil",
-
-        description:
-            "Pesanan anda sudah siap.",
-
-        icon:
-            "bi-check-circle"
+    'Sedia Diambil': {
+        description: 'Tempahan anda sedia untuk diambil.',
+        icon: 'bi-check-circle'
+    },
+    Diserahkan: {
+        description: 'Tempahan telah diserahkan.',
+        icon: 'bi-bag-check'
+    },
+    Selesai: {
+        description: 'Tempahan anda telah selesai.',
+        icon: 'bi-check-circle-fill'
+    },
+    Dibatalkan: {
+        description: 'Tempahan ini telah dibatalkan. Sila hubungi kakitangan kami jika anda perlukan bantuan.',
+        icon: 'bi-x-circle'
     }
-
-];
-
-
-/*==========================================
-    STATUS START TIME
-==========================================*/
-
-function getStatusStartTime() {
-
-    const orderCreatedAt =
-        currentOrder?.createdAt;
-
-    if (orderCreatedAt) {
-
-        const createdAtTime =
-            new Date(orderCreatedAt).getTime();
-
-        localStorage.setItem(
-            "orderStatusStartTime",
-            String(createdAtTime)
-        );
-
-        return createdAtTime;
-
-    }
-
-
-    let startTime =
-        localStorage.getItem(
-            "orderStatusStartTime"
-        );
-
-
-    if (!startTime) {
-
-        startTime =
-            Date.now();
-
-        localStorage.setItem(
-            "orderStatusStartTime",
-            startTime
-        );
-
-    }
-
-
-    return Number(startTime);
-
-}
-
-
-/*==========================================
-    GET CURRENT STATUS
-==========================================*/
-
-function getCurrentStatus() {
-
-    const startTime =
-        getStatusStartTime();
-
-    const elapsed =
-        Math.floor(
-            (Date.now() - startTime) / 1000
-        );
-
-
-    /*
-        0 - 9 saat
-        = Menunggu
-
-        10 - 19 saat
-        = Sedang Disediakan
-
-        20 saat ke atas
-        = Sedia Diambil
-    */
-
-
-    if (elapsed < 10) {
-
-        return 0;
-
-    }
-
-
-    if (elapsed < 20) {
-
-        return 1;
-
-    }
-
-
-    return 2;
-
-}
-
-
-/*==========================================
-    DISPLAY STATUS
-==========================================*/
-
-function displayStatus() {
-
-    const statusIndex =
-        getCurrentStatus();
-
-    const status =
-        orderStatuses[statusIndex];
-
-
-    /*--------------------------------------
-        ICON
-    --------------------------------------*/
-
-    statusIcon.innerHTML = `
-
-        <i class="bi ${status.icon}"></i>
-
-    `;
-
-
-    /*--------------------------------------
-        TITLE
-    --------------------------------------*/
-
-    statusTitle.textContent =
-        status.name;
-
-
-    /*--------------------------------------
-        DESCRIPTION
-    --------------------------------------*/
-
-    statusDescription.textContent =
-        status.description;
-
-
-    /*--------------------------------------
-        SAVE STATUS
-    --------------------------------------*/
-
-    if (currentOrder) {
-
-        currentOrder.status =
-            status.name;
-
-        localStorage.setItem(
-            "currentOrder",
-            JSON.stringify(currentOrder)
-        );
-
-    }
-
-}
-
-
-/*==========================================
-    LOAD ORDER INFORMATION
-==========================================*/
-
-function loadOrderInformation() {
-
-    if (!currentOrder) {
-
-        orderIdElement.textContent =
-            "Tiada Tempahan";
-
-        orderTableElement.textContent =
-            "-";
-
-        orderPaymentElement.textContent =
-            "-";
-
-        orderNotesElement.textContent =
-            "-";
-
-        orderTotalElement.textContent =
-            "RM 0.00";
-
-        return;
-
-    }
-
-
-    /*--------------------------------------
-        ORDER ID
-    --------------------------------------*/
-
-    orderIdElement.textContent =
-        currentOrder.id;
-
-
-    /*--------------------------------------
-        TABLE
-    --------------------------------------*/
-
-    orderTableElement.textContent =
-        `Meja ${currentOrder.table}`;
-
-
-    /*--------------------------------------
-        PAYMENT
-    --------------------------------------*/
-
-    orderPaymentElement.textContent =
-        formatPaymentMethod(
-            currentOrder.paymentMethod,
-            currentOrder.paymentProvider
-        );
-
-
-    /*--------------------------------------
-        NOTES
-    --------------------------------------*/
-
-    orderNotesElement.textContent =
-        currentOrder.notes
-        ? currentOrder.notes
-        : "Tiada komen";
-
-
-    /*--------------------------------------
-        TOTAL
-    --------------------------------------*/
-
-    orderTotalElement.textContent =
-        `RM ${currentOrder.totalPrice.toFixed(2)}`;
-
-}
-
-
-/*==========================================
-    FORMAT PAYMENT METHOD
-==========================================*/
-
-function formatEWalletProvider(provider) {
-
-    switch (provider) {
-
-        case "touchngo":
-
-            return "Touch N Go";
-
-
-        case "googlepay":
-
-            return "Google Pay";
-
-
-        case "applepay":
-
-            return "Apple Pay";
-
-
-        case "boost":
-
-            return "Boost";
-
-
-        default:
-
-            return "E-Wallet";
-
-    }
-
-}
-
-
-function formatPaymentMethod(method, provider) {
-
-    switch (method) {
-
-        case "e-wallet":
-
-            return `E-Wallet (${formatEWalletProvider(provider)})`;
-
-
-        case "fpx":
-
-            return "FPX";
-
-
-        case "online-banking":
-
-        case "online":
-
-            return "Online Banking";
-
-
-        case "cash":
-
-            return "Tunai";
-
-
-        default:
-
-            return method || "-";
-
-    }
-
-}
-
-
-/*==========================================
-    LOAD ORDER ITEMS
-==========================================*/
-
-function loadOrderItems() {
-
-    if (!currentOrder) {
-
-        orderItemsElement.innerHTML = `
-
-            <p class="no-result">
-                Tiada maklumat pesanan.
-            </p>
-
-        `;
-
-        return;
-
-    }
-
-
-    orderItemsElement.innerHTML = "";
-
-
-    currentOrder.items.forEach(item => {
-
-        const itemTotal =
-            item.price * item.quantity;
-
-
-        orderItemsElement.innerHTML += `
-
-            <div class="summary-item">
-
-                <div class="summary-image">
-
-                    <img
-                        src="${item.image}"
-                        alt="${item.name}">
-
-                </div>
-
-
-                <div class="summary-info">
-
-                    <h3>
-                        ${item.name}
-                    </h3>
-
-                    <span>
-                        Kuantiti: ${item.quantity}
-                    </span>
-
-                </div>
-
-
-                <span class="summary-price">
-
-                    RM ${itemTotal.toFixed(2)}
-
-                </span>
-
-            </div>
-
-        `;
-
-    });
-
-}
-
-
-/*==========================================
-    CART BADGE
-==========================================*/
+};
 
 function updateCartBadge() {
-
     if (!cartBadge) return;
 
+    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    const total = Array.isArray(cart)
+        ? cart.reduce((count, item) => count + (Number(item.quantity) || 0), 0)
+        : 0;
+    cartBadge.textContent = String(total);
+}
 
-    const cart =
-        JSON.parse(
-            localStorage.getItem("cart")
-        ) || [];
+function formatPaymentMethod(method, status) {
+    return `${method} — ${status}`;
+}
 
+function renderOrder(order) {
+    const status = orderStatuses[order.status];
+    if (!status) {
+        throw new Error('Status tempahan daripada pelayan tidak dikenali.');
+    }
 
-    let totalItems = 0;
+    if (successHeading) {
+        successHeading.textContent = order.status === 'Dibatalkan'
+            ? 'Tempahan Dibatalkan'
+            : 'Tempahan Berjaya!';
+    }
+    if (orderPageMessage) {
+        orderPageMessage.textContent = order.status === 'Dibatalkan'
+            ? 'Tempahan ini tidak lagi aktif.'
+            : 'Status pesanan dikemas kini daripada sistem B@Bistro.';
+    }
 
+    orderIdElement.textContent = order.order_number;
+    orderTableElement.textContent = `Meja ${order.table_number}`;
+    orderPaymentElement.textContent = formatPaymentMethod(
+        order.payment_method,
+        order.payment_status
+    );
+    orderNotesElement.textContent = order.notes || 'Tiada komen';
+    orderTotalElement.textContent = `RM ${Number(order.total).toFixed(2)}`;
+    statusIcon.replaceChildren();
 
-    cart.forEach(item => {
+    const icon = document.createElement('i');
+    icon.className = `bi ${status.icon}`;
+    statusIcon.appendChild(icon);
+    statusTitle.textContent = order.status;
+    statusDescription.textContent = status.description;
+    orderItemsElement.replaceChildren();
 
-        totalItems +=
-            item.quantity;
+    order.items.forEach(item => {
+        const row = document.createElement('div');
+        row.className = 'summary-item';
 
+        const imageWrapper = document.createElement('div');
+        imageWrapper.className = 'summary-image';
+
+        const image = document.createElement('img');
+        image.src = item.image || 'images/foods/category/makanan.png';
+        image.alt = item.name;
+        imageWrapper.appendChild(image);
+
+        const info = document.createElement('div');
+        info.className = 'summary-info';
+
+        const name = document.createElement('h3');
+        name.textContent = item.name;
+
+        const quantity = document.createElement('span');
+        quantity.textContent = `Kuantiti: ${item.quantity}`;
+        info.append(name, quantity);
+
+        const price = document.createElement('span');
+        price.className = 'summary-price';
+        price.textContent = `RM ${(Number(item.price) * Number(item.quantity)).toFixed(2)}`;
+
+        row.append(imageWrapper, info, price);
+        orderItemsElement.appendChild(row);
     });
-
-
-    cartBadge.textContent =
-        totalItems;
-
 }
 
+async function refreshOrder() {
+    const response = await fetch(
+        `api/orders.php?order=${encodeURIComponent(orderNumber)}`,
+        { headers: { Accept: 'application/json' }, cache: 'no-store' }
+    );
+    const result = await response.json();
 
-/*==========================================
-    CHECK ORDER
-==========================================*/
+    if (!response.ok) {
+        throw new Error(result.error || 'Status tempahan tidak dapat dimuatkan.');
+    }
 
-function checkOrderStatus() {
-
-    if (!currentOrder) return;
-
-
-    displayStatus();
-
+    renderOrder(result.order);
+    return !['Selesai', 'Dibatalkan'].includes(result.order.status);
 }
 
+function showOrderError(message) {
+    if (successHeading) successHeading.textContent = 'Maklumat Tempahan';
+    if (orderPageMessage) orderPageMessage.textContent = '';
+    orderIdElement.textContent = 'Tiada Tempahan';
+    statusTitle.textContent = 'Tidak dapat memuatkan tempahan';
+    statusDescription.textContent = message;
+    orderItemsElement.textContent = 'Tiada maklumat item untuk dipaparkan.';
+}
 
-/*==========================================
-    INITIALIZE
-==========================================*/
+let statusPolling;
 
-loadOrderInformation();
+async function initializeOrderStatus() {
+    updateCartBadge();
 
-loadOrderItems();
+    if (!orderNumber) {
+        showOrderError('Nombor tempahan tidak diberikan.');
+        return;
+    }
 
-updateCartBadge();
+    try {
+        const shouldContinuePolling = await refreshOrder();
+        if (shouldContinuePolling) {
+            statusPolling = setInterval(() => {
+                refreshOrder().then(shouldContinue => {
+                    if (!shouldContinue) clearInterval(statusPolling);
+                }).catch(error => {
+                    statusDescription.textContent = error.message;
+                });
+            }, 5000);
+        }
+    } catch (error) {
+        showOrderError(error.message);
+    }
+}
 
-checkOrderStatus();
-
-
-/*==========================================
-    REAL-TIME STATUS UPDATE
-==========================================*/
-
-setInterval(() => {
-
-    checkOrderStatus();
-
-}, 1000);
+initializeOrderStatus();

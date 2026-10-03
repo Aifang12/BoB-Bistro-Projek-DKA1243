@@ -1,0 +1,146 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 32px 16px;
+    color: #24242b;
+    background: #f4f4f7;
+    font: 15px/1.5 Arial, sans-serif;
+}
+
+.receipt {
+    max-width: 700px;
+    margin: auto;
+    padding: 36px;
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, .08);
+}
+
+.receipt-header {
+    padding-bottom: 20px;
+    text-align: center;
+    border-bottom: 1px dashed #aaa;
+}
+
+.receipt-brand {
+    margin: 0;
+    color: #c73939;
+    font-size: 1.3rem;
+    font-weight: 700;
+}
+
+.receipt-header h1 {
+    margin: 8px 0 4px;
+}
+
+.receipt-details {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    padding: 20px 0;
+}
+
+.receipt-details div {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.receipt-details dt {
+    color: #666;
+}
+
+.receipt-details dd {
+    margin: 0;
+    font-weight: 600;
+    text-align: right;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th,
+td {
+    padding: 12px 8px;
+    border-bottom: 1px solid #e9e9ed;
+    text-align: left;
+}
+
+th:nth-child(2),
+td:nth-child(2) {
+    text-align: center;
+}
+
+th:last-child,
+td:last-child {
+    text-align: right;
+}
+
+tfoot th {
+    border-top: 2px solid #333;
+    border-bottom: 0;
+}
+
+.receipt-notes {
+    margin-top: 24px;
+}
+
+.receipt-thanks {
+    padding-top: 20px;
+    text-align: center;
+}
+
+.receipt-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 28px;
+}
+
+.receipt-actions button,
+.receipt-actions a {
+    padding: 10px 16px;
+    border: 0;
+    border-radius: 8px;
+    color: #fff;
+    background: #c73939;
+    font: inherit;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.receipt-actions a {
+    background: #454550;
+}
+
+@media print {
+    body {
+        padding: 0;
+        background: #fff;
+    }
+
+    .receipt {
+        max-width: none;
+        padding: 0;
+        box-shadow: none;
+    }
+
+    .receipt-actions {
+        display: none;
+    }
+}
+
+@media (max-width: 520px) {
+    .receipt {
+        padding: 20px;
+    }
+
+    .receipt-details {
+        grid-template-columns: 1fr;
+    }
+}

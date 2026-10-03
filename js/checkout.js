@@ -1,543 +1,201 @@
-/*==========================================
-    CHECKOUT PAGE
-==========================================*/
-
-
-/*==========================================
-    DOM ELEMENTS
-==========================================*/
-
-const checkoutItems =
-    document.getElementById("checkoutItems");
-
-const checkoutItemCount =
-    document.getElementById("checkoutItemCount");
-
-const checkoutTotal =
-    document.getElementById("checkoutTotal");
-
-const orderNotes =
-    document.getElementById("orderNotes");
-
-const placeOrderBtn =
-    document.getElementById("placeOrderBtn");
-
-const checkoutTable =
-    document.getElementById("checkoutTable");
-
-const eWalletProviders =
-    document.getElementById("eWalletProviders");
-
-
-/*==========================================
-    GET ACTIVE TABLE
-==========================================*/
-
-function getActiveTable() {
-
-    return localStorage.getItem(
-        "activeTable"
-    );
-
-}
-
-
-/*==========================================
-    CHECK TABLE SESSION
-==========================================*/
-
-function checkTableSession() {
-
-    const activeTable =
-        getActiveTable();
-
-
-    if (!activeTable) {
-
-        alert(
-            "Sila imbas QR Code meja terlebih dahulu."
-        );
-
-        window.location.href =
-            "index.html";
-
-        return false;
-
-    }
-
-
-    return true;
-
-}
-
-
-/*==========================================
-    LOAD ACTIVE TABLE
-==========================================*/
-
-function loadActiveTable() {
-
-    const activeTable =
-        getActiveTable();
-
-
-    if (!activeTable) {
-
-        checkoutTable.textContent =
-            "Meja tidak dikenal pasti";
-
-        return;
-
-    }
-
-
-    checkoutTable.textContent =
-        `Meja ${activeTable}`;
-
-}
-
-
-/*==========================================
-    GET CART
-==========================================*/
+const checkoutItems = document.getElementById('checkoutItems');
+const checkoutItemCount = document.getElementById('checkoutItemCount');
+const checkoutTotal = document.getElementById('checkoutTotal');
+const orderNotes = document.getElementById('orderNotes');
+const placeOrderBtn = document.getElementById('placeOrderBtn');
+const checkoutTable = document.getElementById('checkoutTable');
+const checkoutError = document.getElementById('checkoutError');
 
 function getCart() {
-
-    return JSON.parse(
-        localStorage.getItem("cart")
-    ) || [];
-
+    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    if (!Array.isArray(cart)) {
+        throw new Error('Data bakul tidak sah. Sila kosongkan bakul dan cuba semula.');
+    }
+    return cart;
 }
 
+function getActiveTable() {
+    const tableNumber = Number(localStorage.getItem('activeTable'));
+    return Number.isInteger(tableNumber) && tableNumber > 0
+        ? tableNumber
+        : null;
+}
 
-/*==========================================
-    LOAD CHECKOUT
-==========================================*/
+function showCheckoutError(message) {
+    checkoutError.textContent = message;
+    checkoutError.hidden = false;
+}
+
+function createCheckoutItem(item, unavailable = false) {
+    const article = document.createElement('article');
+    article.className = 'checkout-item';
+
+    const imageWrapper = document.createElement('div');
+    imageWrapper.className = 'checkout-item-image';
+
+    const image = document.createElement('img');
+    image.src = item.image || 'images/foods/category/makanan.png';
+    image.alt = item.name || 'Menu';
+    imageWrapper.appendChild(image);
+
+    const info = document.createElement('div');
+    info.className = 'checkout-item-info';
+
+    const name = document.createElement('h3');
+    name.className = 'checkout-item-name';
+    name.textContent = item.name || 'Menu tidak tersedia';
+
+    const quantity = document.createElement('span');
+    quantity.className = 'checkout-item-quantity';
+    quantity.textContent = `Kuantiti: ${item.quantity}`;
+    info.append(name, quantity);
+
+    const total = document.createElement('span');
+    total.className = 'checkout-item-total';
+    total.textContent = unavailable
+        ? 'Tidak tersedia'
+        : `RM ${(item.price * item.quantity).toFixed(2)}`;
+
+    article.append(imageWrapper, info, total);
+    return article;
+}
 
 function loadCheckout() {
-
     const cart = getCart();
+    checkoutItems.replaceChildren();
 
-    checkoutItems.innerHTML = "";
-
-
-    /*------------------------------------------
-        EMPTY CART
-    ------------------------------------------*/
+    const tableNumber = getActiveTable();
+    checkoutTable.textContent = tableNumber
+        ? `Meja ${tableNumber}`
+        : 'Meja tidak dikenal pasti';
 
     if (cart.length === 0) {
-
-        checkoutItems.innerHTML = `
-
-            <div class="empty-cart">
-
-                <i class="bi bi-cart-x"></i>
-
-                <h2>
-                    Bakul Anda Kosong
-                </h2>
-
-                <p>
-                    Tiada item untuk membuat tempahan.
-                </p>
-
-                <a
-                    href="menu.html"
-                    class="btn btn-primary">
-
-                    Kembali ke Menu
-
-                </a>
-
-            </div>
-
-        `;
-
+        checkoutItems.textContent = 'Bakul anda kosong. Sila tambah menu sebelum membuat tempahan.';
         placeOrderBtn.disabled = true;
-
         return;
-
     }
-
-
-    /*------------------------------------------
-        DISPLAY ITEMS
-    ------------------------------------------*/
 
     let totalItems = 0;
-
     let totalPrice = 0;
-
-
-    cart.forEach(item => {
-
-        const itemTotal =
-            item.price * item.quantity;
-
-
-        totalItems +=
-            item.quantity;
-
-
-        totalPrice +=
-            itemTotal;
-
-
-        checkoutItems.innerHTML += `
-
-            <article class="checkout-item">
-
-                <div class="checkout-item-image">
-
-                    <img
-                        src="${item.image}"
-                        alt="${item.name}">
-
-                </div>
-
-
-                <div class="checkout-item-info">
-
-                    <h3 class="checkout-item-name">
-
-                        ${item.name}
-
-                    </h3>
-
-
-                    <span class="checkout-item-quantity">
-
-                        Kuantiti: ${item.quantity}
-
-                    </span>
-
-                </div>
-
-
-                <span class="checkout-item-total">
-
-                    RM ${itemTotal.toFixed(2)}
-
-                </span>
-
-            </article>
-
-        `;
-
-    });
-
-
-    /*------------------------------------------
-        UPDATE SUMMARY
-    ------------------------------------------*/
-
-    checkoutItemCount.textContent =
-        totalItems;
-
-
-    checkoutTotal.textContent =
-        `RM ${totalPrice.toFixed(2)}`;
-
-}
-
-
-/*==========================================
-    GET PAYMENT METHOD
-==========================================*/
-
-function getPaymentMethod() {
-
-    const selected =
-        document.querySelector(
-            'input[name="paymentMethod"]:checked'
-        );
-
-
-    return selected
-        ? selected.value
-        : null;
-
-}
-
-
-function getEWalletProvider() {
-
-    const selected =
-        document.querySelector(
-            'input[name="eWalletProvider"]:checked'
-        );
-
-
-    return selected
-        ? selected.value
-        : null;
-
-}
-
-
-function setEWalletVisibility() {
-
-    if (!eWalletProviders) {
-
-        return;
-
-    }
-
-
-    const paymentMethod =
-        getPaymentMethod();
-
-
-    if (paymentMethod === "e-wallet") {
-
-        eWalletProviders.classList.remove("hidden");
-
-    } else {
-
-        eWalletProviders.classList.add("hidden");
-
-    }
-
-}
-
-
-function initializePaymentListeners() {
-
-    const paymentMethodInputs =
-        document.querySelectorAll(
-            'input[name="paymentMethod"]'
-        );
-
-
-    paymentMethodInputs.forEach(input => {
-
-        input.addEventListener(
-            "change",
-            setEWalletVisibility
-        );
-
-    });
-
-
-    setEWalletVisibility();
-
-}
-
-
-/*==========================================
-    GENERATE ORDER ID
-==========================================*/
-
-function generateOrderId() {
-
-    const randomNumber =
-        Math.floor(
-            1000 + Math.random() * 9000
-        );
-
-
-    return `BAB-${randomNumber}`;
-
-}
-
-
-/*==========================================
-    PLACE ORDER
-==========================================*/
-
-placeOrderBtn.addEventListener(
-    "click",
-    () => {
-
-        /*--------------------------------------
-            CHECK TABLE SESSION
-        --------------------------------------*/
-
-        const activeTable =
-            getActiveTable();
-
-
-        if (!activeTable) {
-
-            alert(
-                "Sesi meja tidak ditemui. Sila imbas QR Code meja terlebih dahulu."
-            );
-
-            window.location.href =
-                "index.html";
-
-            return;
-
+    let unavailableCount = 0;
+
+    const refreshedCart = cart.map(cartItem => {
+        if (!cartItem || typeof cartItem !== 'object') {
+            unavailableCount += 1;
+            checkoutItems.appendChild(createCheckoutItem(
+                { name: 'Item bakul tidak sah', quantity: 0 },
+                true
+            ));
+            return { id: null, name: 'Item bakul tidak sah', quantity: 0, unavailable: true };
         }
 
+        const itemId = Number(cartItem.id);
+        const quantity = Number(cartItem.quantity);
+        const currentItem = foods.find(food => food.id === itemId);
 
-        /*--------------------------------------
-            CHECK CART
-        --------------------------------------*/
-
-        const cart =
-            getCart();
-
-
-        if (cart.length === 0) {
-
-            alert(
-                "Bakul anda kosong."
-            );
-
-            return;
-
+        if (!Number.isInteger(itemId) || !Number.isInteger(quantity) || quantity < 1) {
+            unavailableCount += 1;
+            checkoutItems.appendChild(createCheckoutItem(cartItem, true));
+            return cartItem;
         }
 
-
-        /*--------------------------------------
-            PAYMENT
-        --------------------------------------*/
-
-        const paymentMethod =
-            getPaymentMethod();
-
-        const paymentProvider =
-            paymentMethod === "e-wallet"
-                ? getEWalletProvider()
-                : null;
-
-
-        if (!paymentMethod) {
-
-            alert(
-                "Sila pilih kaedah pembayaran."
-            );
-
-            return;
-
+        if (!currentItem) {
+            unavailableCount += 1;
+            checkoutItems.appendChild(createCheckoutItem(cartItem, true));
+            return cartItem;
         }
 
-
-        if (
-            paymentMethod === "e-wallet" &&
-            !paymentProvider
-        ) {
-
-            alert(
-                "Sila pilih jenis e-wallet."
-            );
-
-            return;
-
-        }
-
-
-        /*--------------------------------------
-            CALCULATE TOTAL
-        --------------------------------------*/
-
-        let totalPrice = 0;
-
-        let totalItems = 0;
-
-
-        cart.forEach(item => {
-
-            totalPrice +=
-                item.price * item.quantity;
-
-
-            totalItems +=
-                item.quantity;
-
-        });
-
-
-        /*--------------------------------------
-            CREATE ORDER
-        --------------------------------------*/
-
-        const createdAt =
-            new Date().toISOString();
-
-        const order = {
-
-            id:
-                generateOrderId(),
-
-            table:
-                Number(activeTable),
-
-            items:
-                cart,
-
-            totalItems:
-                totalItems,
-
-            totalPrice:
-                totalPrice,
-
-            paymentMethod:
-                paymentMethod,
-
-            paymentProvider:
-                paymentProvider,
-
-            notes:
-                orderNotes
-                    ? orderNotes.value.trim()
-                    : "",
-
-            status:
-                "Menunggu",
-
-            createdAt:
-                createdAt
-
+        const refreshedItem = {
+            id: currentItem.id,
+            name: currentItem.name,
+            price: currentItem.price,
+            image: currentItem.image,
+            quantity
         };
 
+        totalItems += quantity;
+        totalPrice += currentItem.price * quantity;
+        checkoutItems.appendChild(createCheckoutItem(refreshedItem));
+        return refreshedItem;
+    });
 
-        /*--------------------------------------
-            SAVE ORDER
-        --------------------------------------*/
+    localStorage.setItem('cart', JSON.stringify(refreshedCart));
+    checkoutItemCount.textContent = String(totalItems);
+    checkoutTotal.textContent = `RM ${totalPrice.toFixed(2)}`;
 
-        localStorage.setItem(
-            "currentOrder",
-            JSON.stringify(order)
-        );
-
-        localStorage.setItem(
-            "orderStatusStartTime",
-            String(new Date(createdAt).getTime())
-        );
-
-
-        /*--------------------------------------
-            CLEAR CART
-        --------------------------------------*/
-
-        localStorage.removeItem(
-            "cart"
-        );
-
-
-        /*--------------------------------------
-            GO TO ORDER STATUS
-        --------------------------------------*/
-
-        window.location.href =
-            "order-status.html";
-
+    if (unavailableCount > 0) {
+        showCheckoutError('Bakul mengandungi item yang tidak tersedia atau tidak sah. Sila buang item tersebut dari bakul.');
     }
-);
+    if (!tableNumber) {
+        showCheckoutError('Sesi meja tidak ditemui. Sila imbas QR Code meja sebelum membuat tempahan.');
+    }
 
-
-/*==========================================
-    INITIALIZE
-==========================================*/
-
-if (checkTableSession()) {
-
-    loadActiveTable();
-
-    loadCheckout();
-
-    initializePaymentListeners();
-
+    placeOrderBtn.disabled = unavailableCount > 0 || !tableNumber;
 }
+
+async function placeOrder() {
+    checkoutError.hidden = true;
+
+    let cart;
+    try {
+        cart = getCart();
+    } catch (error) {
+        showCheckoutError(error.message);
+        return;
+    }
+    const tableNumber = getActiveTable();
+    const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value;
+
+    if (!tableNumber || cart.length === 0 || !paymentMethod) {
+        showCheckoutError('Sila semak meja, bakul dan kaedah pembayaran sebelum membuat tempahan.');
+        return;
+    }
+
+    placeOrderBtn.disabled = true;
+    placeOrderBtn.textContent = 'Menyimpan tempahan...';
+
+    try {
+        const response = await fetch('api/orders.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+            body: JSON.stringify({
+                table_number: tableNumber,
+                payment_method: paymentMethod,
+                notes: orderNotes.value.trim(),
+                items: cart.map(item => ({
+                    id: Number(item.id),
+                    quantity: Number(item.quantity)
+                }))
+            })
+        });
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result.error || 'Tempahan tidak dapat disimpan.');
+        }
+
+        localStorage.removeItem('cart');
+        window.location.href = `order-status.html?order=${encodeURIComponent(result.order.order_number)}`;
+    } catch (error) {
+        showCheckoutError(error.message || 'Tempahan tidak dapat disimpan. Sila cuba lagi.');
+        placeOrderBtn.disabled = false;
+        placeOrderBtn.innerHTML = '<i class="bi bi-check-circle"></i> Buat Tempahan';
+    }
+}
+
+placeOrderBtn.addEventListener('click', placeOrder);
+
+async function initializeCheckout() {
+    placeOrderBtn.disabled = true;
+    checkoutItems.textContent = 'Ringkasan pesanan sedang dimuatkan...';
+
+    try {
+        await loadFoods();
+        loadCheckout();
+    } catch (error) {
+        checkoutItems.textContent = 'Menu tidak dapat dimuatkan.';
+        showCheckoutError(error.message);
+    }
+}
+
+initializeCheckout();

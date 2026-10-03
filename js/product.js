@@ -27,9 +27,6 @@ const productCategory =
 const productName =
     document.getElementById("productName");
 
-const productRating =
-    document.getElementById("productRating");
-
 const productPrice =
     document.getElementById("productPrice");
 
@@ -66,8 +63,7 @@ let quantity = 1;
     FIND PRODUCT
 ==========================================*/
 
-const product =
-    foods.find(food => food.id === productId);
+let product;
 
 
 /*==========================================
@@ -143,9 +139,6 @@ function loadProduct() {
 
     productName.textContent =
         product.name;
-
-    productRating.textContent =
-        product.rating;
 
     productPrice.textContent =
         `RM ${product.price.toFixed(2)}`;
@@ -350,6 +343,16 @@ function updateCartBadge() {
     INITIALIZE
 ==========================================*/
 
-loadProduct();
-
-updateCartBadge();
+loadFoods()
+    .then(() => {
+        product = foods.find(food => food.id === productId);
+        loadProduct();
+        updateCartBadge();
+    })
+    .catch(error => {
+        productName.textContent = 'Menu tidak dapat dimuatkan.';
+        productDescription.textContent = error.message;
+        addToCartBtn.disabled = true;
+        updateTotalPrice();
+        updateCartBadge();
+    });

@@ -1,0 +1,377 @@
+.admin-page,
+.admin-auth {
+    width: min(1100px, calc(100% - 32px));
+    margin: 36px auto;
+}
+
+.admin-auth {
+    max-width: 480px;
+    padding: 30px;
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: var(--shadow-sm);
+}
+
+.admin-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+.admin-header h1,
+.admin-auth h1 {
+    margin-bottom: 8px;
+}
+
+.admin-eyebrow {
+    color: var(--primary-color);
+    font-weight: 700;
+}
+
+.admin-panel {
+    margin: 20px 0;
+    padding: 24px;
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: var(--shadow-sm);
+}
+
+.admin-panel h2 {
+    margin-bottom: 18px;
+}
+
+.admin-form {
+    display: grid;
+    gap: 16px;
+}
+
+.admin-menu-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.admin-form label {
+    display: grid;
+    gap: 7px;
+    font-weight: 600;
+}
+
+.admin-form input,
+.admin-form select,
+.admin-form textarea {
+    width: 100%;
+    min-height: 44px;
+    padding: 10px 12px;
+    border: 1px solid #d8d8df;
+    border-radius: 9px;
+    background: #fff;
+}
+
+.admin-form textarea {
+    resize: vertical;
+}
+
+.admin-full-width {
+    grid-column: 1 / -1;
+}
+
+.admin-button {
+    min-height: 44px;
+    padding: 10px 18px;
+    border-radius: 9px;
+    background: var(--primary-color);
+    color: #fff;
+    font-weight: 600;
+}
+
+.admin-button-secondary {
+    background: #454550;
+}
+
+.admin-message {
+    margin: 16px 0;
+    padding: 12px 16px;
+    border-radius: 9px;
+    background: #f1f1f5;
+}
+
+.admin-error {
+    color: #8d2020;
+    background: #fff0f0;
+}
+
+.admin-success {
+    color: #176632;
+    background: #eaf8ef;
+}
+
+.admin-help {
+    margin-top: 18px;
+}
+
+.admin-help a,
+.admin-auth > p a {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.admin-table-wrap {
+    overflow-x: auto;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.admin-table th,
+.admin-table td {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+    vertical-align: top;
+}
+
+.admin-order-table {
+    min-width: 920px;
+}
+
+.admin-order-date {
+    margin: 5px 0;
+}
+
+.admin-order-table td:first-child small {
+    display: block;
+    color: var(--text-light);
+}
+
+.admin-order-update {
+    display: grid;
+    min-width: 220px;
+    gap: 8px;
+}
+
+.admin-order-update label {
+    display: grid;
+    gap: 4px;
+    font-size: .8rem;
+    font-weight: 600;
+}
+
+.admin-order-update select {
+    min-height: 38px;
+    padding: 6px 8px;
+    border: 1px solid #d8d8df;
+    border-radius: 8px;
+    background: #fff;
+}
+
+.admin-panel-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 20px;
+}
+
+.admin-panel-heading h2 {
+    margin-bottom: 4px;
+}
+
+.admin-month-filter,
+.admin-expense-form {
+    display: flex;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.admin-month-filter label,
+.admin-expense-form label,
+.admin-menu-edit label {
+    display: grid;
+    gap: 6px;
+    font-size: .9rem;
+    font-weight: 600;
+}
+
+.admin-month-filter input,
+.admin-expense-form input,
+.admin-expense-form select,
+.admin-menu-edit input,
+.admin-menu-edit select,
+.admin-menu-edit textarea {
+    min-height: 40px;
+    padding: 8px 10px;
+    border: 1px solid #d8d8df;
+    border-radius: 8px;
+    background: #fff;
+    font: inherit;
+}
+
+.admin-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+    margin: 20px 0 28px;
+}
+
+.admin-metrics article {
+    display: grid;
+    gap: 8px;
+    padding: 16px;
+    border-radius: 12px;
+    background: #f7f7f9;
+}
+
+.admin-metrics article span {
+    color: var(--text-light);
+    font-size: .88rem;
+}
+
+.admin-metrics article strong {
+    font-size: 1.25rem;
+}
+
+.admin-chart-legend {
+    display: flex;
+    gap: 20px;
+    margin: 10px 0;
+    font-size: .9rem;
+}
+
+.admin-chart-legend span::before {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    margin-right: 7px;
+    border-radius: 2px;
+    content: "";
+}
+
+.admin-legend-sales::before,
+.admin-chart-sales {
+    background: #c73939;
+}
+
+.admin-legend-expenses::before,
+.admin-chart-expense {
+    background: #454550;
+}
+
+.admin-chart {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(28px, 1fr));
+    gap: 8px;
+    min-height: 190px;
+    padding: 12px 4px 0;
+    border-bottom: 1px solid #d8d8df;
+}
+
+.admin-chart-month {
+    display: grid;
+    grid-template-rows: 1fr auto;
+    gap: 8px;
+    min-width: 0;
+    color: var(--text-light);
+    font-size: .8rem;
+    text-align: center;
+}
+
+.admin-chart-bars {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 3px;
+    height: 150px;
+}
+
+.admin-chart-bar {
+    width: min(35%, 18px);
+    min-height: 3px;
+    border-radius: 4px 4px 0 0;
+}
+
+.admin-expense-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    margin: 20px 0 28px;
+}
+
+.admin-kitchen-menu {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+}
+
+.admin-kitchen-menu article {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border: 1px solid #eee;
+    border-radius: 10px;
+}
+
+.admin-kitchen-menu img {
+    width: 56px;
+    height: 56px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+.admin-kitchen-menu article div {
+    display: grid;
+    gap: 4px;
+}
+
+.admin-kitchen-menu article span,
+.admin-table td small {
+    display: block;
+    color: var(--text-light);
+}
+
+.admin-menu-edit {
+    display: grid;
+    min-width: 210px;
+    gap: 10px;
+}
+
+.admin-menu-edit textarea {
+    resize: vertical;
+}
+
+.admin-receipt-link {
+    display: inline-block;
+    margin: 10px 0;
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.admin-close-order {
+    margin-top: 8px;
+}
+
+@media (max-width: 640px) {
+    .admin-header {
+        align-items: flex-start;
+    }
+
+    .admin-menu-form {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-full-width {
+        grid-column: auto;
+    }
+
+    .admin-panel-heading {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .admin-chart {
+        gap: 3px;
+        overflow-x: auto;
+    }
+}

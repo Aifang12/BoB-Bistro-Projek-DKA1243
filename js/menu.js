@@ -1,191 +1,91 @@
-/*==========================================
-    MENU PAGE
-==========================================*/
+const urlParams = new URLSearchParams(window.location.search);
+const categoryFromURL = urlParams.get('category');
+const menuContainer = document.getElementById('menuContainer');
+const searchInput = document.getElementById('searchInput');
+const categoryContainer = document.getElementById('categoryButtons');
 
-const urlParams =
-new URLSearchParams(window.location.search);
-
-const categoryFromURL =
-urlParams.get("category");
-
-const menuContainer = document.getElementById("menuContainer");
-const searchInput = document.getElementById("searchInput");
-const categoryButtons = document.querySelectorAll(".category-btn");
-
-let currentCategory = "Semua";
-
-/*==========================================
-    RENDER MENU
-==========================================*/
+let currentCategory = 'Semua';
 
 function loadMenu(data) {
-
-    menuContainer.innerHTML = "";
+    menuContainer.replaceChildren();
 
     if (data.length === 0) {
-
-        menuContainer.innerHTML = `
-            <p class="no-result">
-                Tiada makanan dijumpai.
-            </p>
-        `;
-
+        const noResult = document.createElement('p');
+        noResult.className = 'no-result';
+        noResult.textContent = 'Tiada makanan dijumpai.';
+        menuContainer.appendChild(noResult);
         return;
-
     }
 
-    data.forEach(food => {
-
-        menuContainer.innerHTML += `
-
-        <article class="food-card" data-id="${food.id}">
-
-            <img src="${food.image}" alt="${food.name}">
-
-            <div class="food-info">
-
-                <h3 class="food-title">
-
-                    ${food.name}
-
-                </h3>
-
-                <p class="food-category">
-
-                    ${food.category}
-
-                </p>
-
-                <div class="food-bottom">
-
-                    <span class="food-price">
-
-                        RM ${food.price.toFixed(2)}
-
-                    </span>
-
-                    <button class="add-btn">
-
-                        <i class="bi bi-plus"></i>
-
-                    </button>
-
-                </div>
-
-            </div>
-
-        </article>
-
-        `;
-
-    });
-
+    data.forEach(food => menuContainer.appendChild(createFoodCard(food)));
 }
 
-/*==========================================
-    FILTER MENU
-==========================================*/
+function renderCategories() {
+    categoryContainer.replaceChildren();
+    const categories = ['Semua', ...menuCategories.map(category => category.name)];
+
+    categories.forEach(category => {
+        const button = document.createElement('button');
+        button.className = 'category-btn';
+        button.type = 'button';
+        button.textContent = category;
+        button.classList.toggle('active', category === currentCategory);
+        categoryContainer.appendChild(button);
+    });
+}
 
 function filterMenu() {
-
-    const keyword = searchInput.value.toLowerCase();
-
+    const keyword = searchInput.value.trim().toLocaleLowerCase();
     const filtered = foods.filter(food => {
-
         const matchCategory =
-            currentCategory === "Semua"
-            ||
-            food.category.toLowerCase() === currentCategory.toLowerCase();
-
+            currentCategory === 'Semua' ||
+            food.category.toLocaleLowerCase() === currentCategory.toLocaleLowerCase();
         const matchSearch =
-            food.name.toLowerCase().includes(keyword);
+            food.name.toLocaleLowerCase().includes(keyword) ||
+            food.category.toLocaleLowerCase().includes(keyword);
 
         return matchCategory && matchSearch;
-
     });
 
     loadMenu(filtered);
-
 }
 
-function goToProduct(id){
-
-    window.location.href =
-    `product.html?id=${id}`;
-
+function goToProduct(id) {
+    window.location.href = `product.html?id=${encodeURIComponent(id)}`;
 }
-/*==========================================
-    SEARCH
-==========================================*/
 
-searchInput.addEventListener("input", filterMenu);
+searchInput.addEventListener('input', filterMenu);
 
-/*==========================================
-    CATEGORY
-==========================================*/
+categoryContainer.addEventListener('click', event => {
+    const button = event.target.closest('.category-btn');
+    if (!button) return;
 
-categoryButtons.forEach(button => {
-
-    button.addEventListener("click", () => {
-
-        categoryButtons.forEach(btn => {
-
-            btn.classList.remove("active");
-
-        });
-
-        button.classList.add("active");
-
-        currentCategory = button.textContent.trim();
-
-        filterMenu();
-
+    currentCategory = button.textContent.trim();
+    categoryContainer.querySelectorAll('.category-btn').forEach(categoryButton => {
+        categoryButton.classList.toggle('active', categoryButton === button);
     });
-
-});
-/*==========================================
-    INITIALIZE
-==========================================*/
-
-if (categoryFromURL) {
-
-    currentCategory = categoryFromURL;
-
-    categoryButtons.forEach(button => {
-
-        if (button.textContent.trim() === categoryFromURL) {
-
-            button.classList.add("active");
-
-        } else {
-
-            button.classList.remove("active");
-
-        }
-
-    });
-
     filterMenu();
+});
 
-} else {
+menuContainer.addEventListener('click', event => {
+    const card = event.target.closest('.food-card');
+    if (card) goToProduct(card.dataset.id);
+});
 
-    loadMenu(foods);
+async function initializeMenu() {
+    menuContainer.textContent = 'Menu sedang dimuatkan...';
 
+    try {
+        await loadFoods();
+        const requestedCategory = menuCategories.find(
+            category => category.name.toLocaleLowerCase() === (categoryFromURL || '').toLocaleLowerCase()
+        );
+        currentCategory = requestedCategory ? requestedCategory.name : 'Semua';
+        renderCategories();
+        filterMenu();
+    } catch (error) {
+        menuContainer.textContent = error.message;
+    }
 }
 
-/*==========================================
-    CLICK PRODUCT
-==========================================*/
-
-menuContainer.addEventListener("click",(event)=>{
-
-    const card=event.target.closest(".food-card");
-
-    if(!card) return;
-
-    const id=card.dataset.id;
-
-    window.location.href=
-    `product.html?id=${id}`;
-
-});
+initializeMenu();
