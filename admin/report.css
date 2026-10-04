@@ -1,0 +1,240 @@
+* {
+    box-sizing: border-box;
+}
+
+html {
+    color: #222;
+    background: #f1f2f4;
+    font: 11pt/1.5 Arial, Helvetica, sans-serif;
+}
+
+body {
+    margin: 0;
+    padding: 24px;
+    font: inherit;
+    line-height: 1.5;
+}
+
+.report-actions {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    max-width: 1050px;
+    margin: 0 auto 18px;
+}
+
+.report-actions a,
+.report-actions button {
+    display: inline-block;
+    padding: 10px 16px;
+    border: 0;
+    border-radius: 7px;
+    color: #fff;
+    background: #b71c1c;
+    font: inherit;
+    line-height: 1.5;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.report-actions a:first-child {
+    background: #454550;
+}
+
+.report-document {
+    max-width: 1050px;
+    margin: 0 auto;
+    padding: 34px;
+    background: #fff;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, .08);
+    font: 11pt/1.5 Arial, Helvetica, sans-serif;
+}
+
+.report-header {
+    margin-bottom: 24px;
+    padding-bottom: 18px;
+    border-bottom: 2px solid #b71c1c;
+    text-align: center;
+}
+
+.report-header img {
+    display: block;
+    width: 170px;
+    height: 68px;
+    margin: 0 auto 8px;
+    object-fit: contain;
+}
+
+.report-header h1 {
+    margin: 0;
+    font-size: 11pt;
+}
+
+.report-header p {
+    margin: 3px 0;
+}
+
+.report-period {
+    font-weight: 700;
+}
+
+.report-warning {
+    margin: 16px 0;
+    padding: 10px 12px;
+    border: 1px solid #e0b45c;
+    background: #fff6df;
+}
+
+.report-generated,
+.report-method {
+    color: #555;
+    font-size: 11pt;
+}
+
+.report-document section {
+    margin: 22px 0;
+    page-break-inside: avoid;
+}
+
+.report-document h2 {
+    margin: 0 0 10px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #bbb;
+    font-size: 11pt;
+}
+
+.report-document h3,
+.report-document h4 {
+    margin: 10px 0 4px;
+    font-size: 11pt;
+}
+
+.report-document table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 8px 0 14px;
+    font: inherit;
+    line-height: 1.5;
+}
+
+.report-document th,
+.report-document td {
+    padding: 6px 8px;
+    border: 1px solid #c9c9c9;
+    text-align: left;
+    vertical-align: top;
+    overflow-wrap: anywhere;
+}
+
+.report-document th {
+    background: #f4f4f4;
+    font-weight: 700;
+}
+
+.report-document .report-total th,
+.report-document .report-total td {
+    border-top: 2px solid #333;
+    font-weight: 700;
+}
+
+.report-order {
+    margin: 14px 0 18px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    page-break-inside: avoid;
+}
+
+.report-order table {
+    font-size: 11pt;
+}
+
+.report-footer {
+    margin-top: 32px;
+    padding-top: 12px;
+    border-top: 1px solid #bbb;
+    color: #666;
+    text-align: center;
+}
+
+.report-error {
+    max-width: 700px;
+    margin: 12vh auto;
+    padding: 28px;
+    background: #fff;
+    line-height: 1.5;
+}
+
+.report-error a {
+    color: #b71c1c;
+}
+
+@page {
+    size: A4 portrait;
+    margin: 14mm;
+}
+
+@media print {
+    html,
+    body {
+        background: #fff;
+        font: 11pt/1.5 Arial, Helvetica, sans-serif;
+    }
+
+    body {
+        padding: 0;
+    }
+
+    .report-actions {
+        display: none;
+    }
+
+    .report-document {
+        max-width: none;
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+    }
+
+    .report-document section,
+    .report-order {
+        page-break-inside: auto;
+        break-inside: auto;
+    }
+
+    .report-document tr {
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+
+    .report-document h2,
+    .report-order h3,
+    .report-order h4 {
+        page-break-after: avoid;
+        break-after: avoid;
+    }
+}
+
+@media (max-width: 700px) {
+    body {
+        padding: 10px;
+    }
+
+    .report-document {
+        padding: 18px;
+    }
+
+    .report-document section {
+        overflow-x: auto;
+    }
+
+    .report-document table {
+        min-width: 620px;
+    }
+
+    .report-actions a,
+    .report-actions button {
+        flex: 1 1 150px;
+        text-align: center;
+    }
+}

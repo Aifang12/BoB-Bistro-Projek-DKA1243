@@ -2,6 +2,7 @@
 
 require_once __DIR__ . '/auth.php';
 admin_require_authentication();
+require_once __DIR__ . '/report_helpers.php';
 
 $error = '';
 $userRole = '';
@@ -27,17 +28,18 @@ $monthlyReport = [
     'paid_orders' => 0,
     'payment_count' => 0,
 ];
-$chartYear = (int) date('Y');
-$requestedMonth = (string) ($_GET['month'] ?? date('Y-m'));
-$selectedMonth = preg_match('/\A\d{4}-(0[1-9]|1[0-2])\z/', $requestedMonth)
-    ? $requestedMonth
-    : date('Y-m');
-$reportStart = DateTimeImmutable::createFromFormat('!Y-m', $selectedMonth);
-if (!$reportStart || $reportStart->format('Y-m') !== $selectedMonth) {
-    $selectedMonth = date('Y-m');
-    $reportStart = new DateTimeImmutable('first day of this month');
+$reportPeriod = admin_report_period([
+    'period' => 'month',
+    'month' => date('Y-m'),
+]);
+try {
+    $reportPeriod = admin_report_period($_GET);
+} catch (InvalidArgumentException $exception) {
+    $error = $exception->getMessage();
 }
-$reportEnd = $reportStart->modify('+1 month');
+$reportData = null;
+$reportUrl = 'report.php';
+$reportDownloadUrl = 'report_download.php';
 $transactionOpen = false;
 $orderTransitions = [
     'Menunggu' => ['Menunggu', 'Sedang Disediakan', 'Dibatalkan'],
@@ -827,96 +829,32 @@ if (isset($conn) && $conn instanceof mysqli) {
                  ORDER BY category_name'
             )->fetch_all(MYSQLI_ASSOC);
 
-            $expenseStart = $reportStart->format('Y-m-d');
-            $expenseEnd = $reportEnd->format('Y-m-d');
-            $financeStatement = $conn->prepare(
-                "SELECT
-                    COALESCE(SUM(CASE
-                        WHEN payment_status = 'Berjaya' THEN amount
-                        WHEN payment_status = 'Dipulangkan' THEN -amount
-                        ELSE 0
-                    END), 0) AS revenue,
-                    COALESCE(SUM(payment_status = 'Berjaya'), 0) AS payment_count,
-                    COUNT(DISTINCT CASE
-                        WHEN payment_status = 'Berjaya' THEN order_id
-                    END) AS paid_orders
-                 FROM payments
-                 WHERE created_at >= ? AND created_at < ?"
-            );
-            $financeStatement->bind_param('ss', $expenseStart, $expenseEnd);
-            $financeStatement->execute();
-            $monthlyReport = array_merge(
-                $monthlyReport,
-                $financeStatement->get_result()->fetch_assoc()
-            );
-
-            $expenseTotalStatement = $conn->prepare(
-                'SELECT COALESCE(SUM(amount), 0) AS expenses
-                 FROM expenses
-                 WHERE expense_date >= ? AND expense_date < ?'
-            );
-            $expenseTotalStatement->bind_param('ss', $expenseStart, $expenseEnd);
-            $expenseTotalStatement->execute();
-            $monthlyReport['expenses'] = (float) $expenseTotalStatement
-                ->get_result()
-                ->fetch_assoc()['expenses'];
-            $monthlyReport['revenue'] = (float) $monthlyReport['revenue'];
-            $monthlyReport['profit'] = $monthlyReport['revenue'] - $monthlyReport['expenses'];
-            $monthlyReport['payment_count'] = (int) $monthlyReport['payment_count'];
-            $monthlyReport['paid_orders'] = (int) $monthlyReport['paid_orders'];
-
-            $chartYear = (int) $reportStart->format('Y');
-            $yearStart = sprintf('%04d-01-01', $chartYear);
-            $yearEnd = sprintf('%04d-01-01', $chartYear + 1);
-            $salesByMonth = $conn->prepare(
-                "SELECT MONTH(created_at) AS month_number,
-                        SUM(CASE
-                            WHEN payment_status = 'Berjaya' THEN amount
-                            WHEN payment_status = 'Dipulangkan' THEN -amount
-                            ELSE 0
-                        END) AS revenue
-                 FROM payments
-                 WHERE created_at >= ? AND created_at < ?
-                 GROUP BY MONTH(created_at)"
-            );
-            $salesByMonth->bind_param('ss', $yearStart, $yearEnd);
-            $salesByMonth->execute();
-            $salesValues = [];
-            foreach ($salesByMonth->get_result() as $row) {
-                $salesValues[(int) $row['month_number']] = (float) $row['revenue'];
-            }
-
-            $expensesByMonth = $conn->prepare(
-                'SELECT MONTH(expense_date) AS month_number, SUM(amount) AS expenses
-                 FROM expenses
-                 WHERE expense_date >= ? AND expense_date < ?
-                 GROUP BY MONTH(expense_date)'
-            );
-            $expensesByMonth->bind_param('ss', $yearStart, $yearEnd);
-            $expensesByMonth->execute();
-            $expenseValues = [];
-            foreach ($expensesByMonth->get_result() as $row) {
-                $expenseValues[(int) $row['month_number']] = (float) $row['expenses'];
-            }
-
-            $monthNames = [
-                'Jan', 'Feb', 'Mac', 'Apr', 'Mei', 'Jun',
-                'Jul', 'Ogo', 'Sep', 'Okt', 'Nov', 'Dis',
+            $reportData = admin_load_financial_report($conn, $reportPeriod);
+            $monthlyReport = [
+                'revenue' => $reportData['summary']['net_revenue'],
+                'expenses' => $reportData['summary']['expenses'],
+                'profit' => $reportData['summary']['profit'],
+                'paid_orders' => $reportData['summary']['successful_order_count'],
+                'payment_count' => $reportData['summary']['successful_count'],
             ];
-            for ($month = 1; $month <= 12; $month++) {
-                $monthlySales[] = [
-                    'label' => $monthNames[$month - 1],
-                    'revenue' => $salesValues[$month] ?? 0.0,
-                    'expenses' => $expenseValues[$month] ?? 0.0,
-                ];
-            }
+            $monthlySales = $reportData['timeline'];
+            $chartYear = (int) $reportPeriod['start']->format('Y');
             $chartMax = max(
                 1,
                 ...array_map(
-                    static fn (array $row): float => max($row['revenue'], $row['expenses']),
+                    static fn (array $row): float => max(abs($row['revenue']), $row['expenses']),
                     $monthlySales
                 )
             );
+            $reportFilterKey = $reportPeriod['period'] === 'week'
+                ? 'date'
+                : ($reportPeriod['period'] === 'year' ? 'year' : 'month');
+            $reportQuery = [
+                'period' => $reportPeriod['period'],
+                $reportFilterKey => $reportPeriod['selection'],
+            ];
+            $reportUrl = 'report.php?' . http_build_query($reportQuery);
+            $reportDownloadUrl = 'report_download.php?' . http_build_query($reportQuery);
 
             $recentExpenseResult = $conn->query(
                 'SELECT expenses.amount, expenses.description, expenses.expense_date,
@@ -1027,7 +965,7 @@ if (isset($conn) && $conn instanceof mysqli) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= admin_escape($isAdmin ? 'Panel Pentadbir' : ($userRole === 'Kitchen' ? 'Panel Dapur' : 'Panel Juruwang')) ?> | B@Bistro</title>
     <link rel="stylesheet" href="../css/style.css">
-    <link rel="stylesheet" href="admin.css?v=2">
+    <link rel="stylesheet" href="admin.css?v=3">
 </head>
 <body>
     <main class="admin-page">
@@ -1058,35 +996,65 @@ if (isset($conn) && $conn instanceof mysqli) {
         <section class="admin-panel">
             <div class="admin-panel-heading">
                 <div>
-                    <h2>Ringkasan kewangan dan laporan bulanan</h2>
-                    <!-- <p class="admin-help">Hasil ialah bayaran berjaya ditolak bayaran dipulangkan; untung ialah hasil bersih ditolak perbelanjaan.</p> -->
+                    <h2>Kewangan dan laporan</h2>
+                    <p class="admin-help">Pilih tempoh untuk menyemak ringkasan dan jana laporan terperinci.</p>
                 </div>
-                <form method="get" class="admin-month-filter">
-                    <label for="report-month">Bulan laporan</label>
-                    <input id="report-month" type="month" name="month" value="<?= admin_escape($selectedMonth) ?>">
+                <form method="get" class="admin-month-filter" id="report-filter">
+                    <label for="report-period">Jenis laporan</label>
+                    <select id="report-period" name="period">
+                        <option value="week"<?= $reportPeriod['period'] === 'week' ? ' selected' : '' ?>>Mingguan</option>
+                        <option value="month"<?= $reportPeriod['period'] === 'month' ? ' selected' : '' ?>>Bulanan</option>
+                        <option value="year"<?= $reportPeriod['period'] === 'year' ? ' selected' : '' ?>>Tahunan</option>
+                    </select>
+                    <label class="report-period-field" data-period="week" for="report-week"<?= $reportPeriod['period'] === 'week' ? '' : ' hidden' ?>>Pilih tarikh dalam minggu
+                        <input id="report-week" type="date" name="date" value="<?= admin_escape($reportPeriod['period'] === 'week' ? $reportPeriod['selection'] : date('Y-m-d')) ?>">
+                    </label>
+                    <label class="report-period-field" data-period="month" for="report-month"<?= $reportPeriod['period'] === 'month' ? '' : ' hidden' ?>>Pilih bulan
+                        <input id="report-month" type="month" name="month" value="<?= admin_escape($reportPeriod['period'] === 'month' ? $reportPeriod['selection'] : date('Y-m')) ?>">
+                    </label>
+                    <label class="report-period-field" data-period="year" for="report-year"<?= $reportPeriod['period'] === 'year' ? '' : ' hidden' ?>>Pilih tahun
+                        <input id="report-year" type="number" name="year" min="1000" max="9998" step="1" value="<?= admin_escape($reportPeriod['period'] === 'year' ? $reportPeriod['selection'] : date('Y')) ?>">
+                    </label>
                     <button class="admin-button" type="submit">Papar</button>
                 </form>
             </div>
+            <p class="admin-report-period"><?= admin_escape($reportPeriod['label']) ?> · <?= admin_escape($reportPeriod['start']->format('d/m/Y')) ?> – <?= admin_escape($reportPeriod['end']->modify('-1 day')->format('d/m/Y')) ?></p>
+            <?php if ($reportData !== null && ($reportData['summary']['test_order_count'] + $reportData['summary']['test_expense_count']) > 0): ?>
+                <p class="admin-report-warning" role="note">
+                    Tempoh ini mengandungi <?= (int) $reportData['summary']['test_order_count'] ?> pesanan dan
+                    <?= (int) $reportData['summary']['test_expense_count'] ?> perbelanjaan data ujian.
+                    Rekod berlabel <strong>[DATA UJIAN LAPORAN]</strong> termasuk dalam jumlah di bawah.
+                </p>
+            <?php endif; ?>
+            <?php if ($reportData !== null): ?>
+                <div class="admin-report-actions">
+                    <a class="admin-button" href="<?= admin_escape($reportUrl) ?>" target="_blank" rel="noopener">Jana laporan terperinci</a>
+                    <a class="admin-button admin-button-secondary" href="<?= admin_escape($reportDownloadUrl) ?>">Muat turun CSV</a>
+                </div>
+            <?php endif; ?>
             <div class="admin-metrics">
                 <article><span>Hasil bersih</span><strong>RM <?= number_format($monthlyReport['revenue'], 2) ?></strong></article>
                 <article><span>Perbelanjaan</span><strong>RM <?= number_format($monthlyReport['expenses'], 2) ?></strong></article>
                 <article><span>Untung bersih</span><strong>RM <?= number_format($monthlyReport['profit'], 2) ?></strong></article>
                 <article><span>Pesanan dibayar</span><strong><?= (int) $monthlyReport['paid_orders'] ?></strong></article>
                 <article><span>Transaksi berjaya</span><strong><?= (int) $monthlyReport['payment_count'] ?></strong></article>
+                <article><span>Bayaran dipulangkan</span><strong><?= (int) ($reportData['summary']['refunded_count'] ?? 0) ?></strong></article>
+                <article><span>Menunggu pengesahan</span><strong><?= (int) ($reportData['summary']['pending_count'] ?? 0) ?></strong></article>
             </div>
-            <h3>Graf jualan dan perbelanjaan <?= (int) $chartYear ?></h3>
+            <h3>Trend hasil bersih dan perbelanjaan · <?= admin_escape($reportPeriod['label']) ?></h3>
             <div class="admin-chart-legend"><span class="admin-legend-sales">Jualan bersih</span><span class="admin-legend-expenses">Perbelanjaan</span></div>
-            <div class="admin-chart" role="img" aria-label="Graf jualan dan perbelanjaan bulanan bagi tahun <?= (int) $chartYear ?>">
+            <div class="admin-chart" style="--chart-count: <?= count($monthlySales) ?>" role="img" aria-label="Graf jualan bersih dan perbelanjaan bagi <?= admin_escape($reportPeriod['label']) ?>">
                 <?php foreach ($monthlySales as $monthData): ?>
                     <div class="admin-chart-month">
                         <div class="admin-chart-bars">
-                            <span class="admin-chart-bar admin-chart-sales" title="Jualan <?= admin_escape($monthData['label']) ?>: RM <?= number_format($monthData['revenue'], 2) ?>" style="height: <?= max(2, (int) round($monthData['revenue'] / $chartMax * 100)) ?>%"></span>
+                            <span class="admin-chart-bar admin-chart-sales" title="Jualan <?= admin_escape($monthData['label']) ?>: RM <?= number_format($monthData['revenue'], 2) ?>" style="height: <?= max(2, (int) round(abs($monthData['revenue']) / $chartMax * 100)) ?>%"></span>
                             <span class="admin-chart-bar admin-chart-expense" title="Perbelanjaan <?= admin_escape($monthData['label']) ?>: RM <?= number_format($monthData['expenses'], 2) ?>" style="height: <?= max(2, (int) round($monthData['expenses'] / $chartMax * 100)) ?>%"></span>
                         </div>
                         <span><?= admin_escape($monthData['label']) ?></span>
                     </div>
                 <?php endforeach; ?>
             </div>
+            <p class="admin-help">Hasil bersih mengira bayaran berjaya selepas ditolak bayaran dipulangkan. Bayaran belum selesai tidak dianggap hasil. Perbelanjaan dikelaskan mengikut tarikh perbelanjaan.</p>
         </section>
 
         <section class="admin-panel">
@@ -1424,6 +1392,18 @@ if (isset($conn) && $conn instanceof mysqli) {
                         </tbody>
                     </table>
                 </div>
+            <script>
+                const reportPeriodSelect = document.getElementById('report-period');
+                reportPeriodSelect?.addEventListener('change', () => {
+                    document.querySelectorAll('.report-period-field').forEach((field) => {
+                        const isActive = field.dataset.period === reportPeriodSelect.value;
+                        field.hidden = !isActive;
+                        const input = field.querySelector('input');
+                        input.disabled = !isActive;
+                        input.required = isActive;
+                    });
+                });
+            </script>
             <?php endif; ?>
         </section>
 

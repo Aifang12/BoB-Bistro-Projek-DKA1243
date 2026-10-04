@@ -193,6 +193,7 @@
 .admin-month-filter label,
 .admin-expense-form label,
 .admin-month-filter input,
+.admin-month-filter select,
 .admin-expense-form input,
 .admin-expense-form select,
 .admin-menu-modal-form input,
@@ -258,10 +259,11 @@
 
 .admin-chart {
     display: grid;
-    grid-template-columns: repeat(12, minmax(28px, 1fr));
+    grid-template-columns: repeat(var(--chart-count, 12), minmax(24px, 1fr));
     gap: 8px;
     min-height: 190px;
     padding: 12px 4px 0;
+    overflow-x: auto;
     border-bottom: 1px solid #d8d8df;
 }
 
@@ -455,6 +457,38 @@
     margin: 10px 0;
     color: var(--primary-color);
     font-weight: 600;
+}
+
+.admin-report-period {
+    margin: 14px 0;
+    color: var(--text-light);
+    font-weight: 600;
+}
+
+.admin-report-warning {
+    margin: 12px 0;
+    padding: 12px 14px;
+    border: 1px solid #e0b45c;
+    border-radius: 8px;
+    color: #684600;
+    background: #fff6df;
+}
+
+.admin-report-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 16px 0 20px;
+}
+
+.admin-report-actions a {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+}
+
+.report-period-field[hidden] {
+    display: none;
 }
 
 .admin-close-order {
