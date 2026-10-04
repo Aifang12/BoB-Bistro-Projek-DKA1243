@@ -15,7 +15,7 @@
 
     <!-- CSS -->
 
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=9">
 
 </head>
 
@@ -27,7 +27,9 @@
 
         <div class="nav-left">
 
-            <i class="bi bi-list nav-icon"></i>
+            <button class="site-menu-toggle" id="siteMenuToggle" type="button" aria-label="Buka menu navigasi" aria-haspopup="dialog" aria-controls="siteMenu" aria-expanded="false">
+                <i class="bi bi-list nav-icon" aria-hidden="true"></i>
+            </button>
 
         </div>
 
@@ -51,6 +53,23 @@
         </div>
 
     </header>
+
+    <dialog class="site-menu-dialog" id="siteMenu" aria-labelledby="siteMenuTitle">
+        <nav class="site-menu-panel" aria-label="Navigasi utama">
+            <div class="site-menu-heading">
+                <h2 id="siteMenuTitle"><img class="site-menu-brand" src="images/logo/logo coloured.svg" alt="B@Bistro"></h2>
+                <button class="site-menu-close" id="siteMenuClose" type="button" aria-label="Tutup menu navigasi">
+                    <i class="bi bi-x-lg" aria-hidden="true"></i>
+                </button>
+            </div>
+            <a class="site-menu-link" href="index.html"><i class="bi bi-house" aria-hidden="true"></i><span>Laman Utama</span></a>
+            <a class="site-menu-link" href="menu.html"><i class="bi bi-journal-text" aria-hidden="true"></i><span>Menu Makanan</span></a>
+            <a class="site-menu-link" href="cart.html"><i class="bi bi-cart3" aria-hidden="true"></i><span>Bakul Pesanan</span><span class="site-menu-cart-count" id="siteMenuCartCount">0</span></a>
+            <a class="site-menu-link site-staff-link" href="admin/login.php"><i class="bi bi-person-lock" aria-hidden="true"></i><span>Log Masuk Kakitangan</span></a>
+            <p class="site-menu-note">Pilih hidangan kegemaran anda dan buat pesanan dengan mudah.</p>
+        </nav>
+    </dialog>
+
     <!-- =========================
      HERO SECTION
 ========================= -->
@@ -177,11 +196,11 @@
             © 2026 B@Bistro. All Rights Reserved.
         </small>
 
-        <a href="admin/login.php" class="admin-entry">Admin</a>
+        <!-- <a href="admin/login.php" class="admin-entry">Admin</a> -->
 
     </footer>
-    <script src="js/data.js"></script>
-    <script src="js/app.js"></script>
+    <script src="js/data.js?v=2"></script>
+    <script src="js/app.js?v=4"></script>
 </body>
 
 </html>

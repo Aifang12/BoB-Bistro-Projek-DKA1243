@@ -65,12 +65,12 @@ function receipt_escape(string $value): string
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Resit <?= receipt_escape($receipt['receipt_number']) ?> | B@Bistro</title>
-    <link rel="stylesheet" href="receipt.css">
+    <link rel="stylesheet" href="receipt.css?v=2">
 </head>
 <body>
     <main class="receipt">
         <header class="receipt-header">
-            <p class="receipt-brand">B@Bistro</p>
+            <img class="receipt-brand" src="../images/logo/logo coloured.svg" alt="B@Bistro">
             <h1>Resit Pembayaran</h1>
             <p><?= receipt_escape($receipt['receipt_number']) ?></p>
         </header>

@@ -1027,13 +1027,13 @@ if (isset($conn) && $conn instanceof mysqli) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= admin_escape($isAdmin ? 'Panel Pentadbir' : ($userRole === 'Kitchen' ? 'Panel Dapur' : 'Panel Juruwang')) ?> | B@Bistro</title>
     <link rel="stylesheet" href="../css/style.css">
-    <link rel="stylesheet" href="admin.css">
+    <link rel="stylesheet" href="admin.css?v=2">
 </head>
 <body>
     <main class="admin-page">
         <header class="admin-header">
             <div>
-                <p class="admin-eyebrow">B@Bistro</p>
+                <img class="admin-brand-logo" src="../images/logo/logo coloured.svg" alt="B@Bistro">
                 <h1><?= $isAdmin ? 'Panel Pentadbir' : ($userRole === 'Kitchen' ? 'Panel Dapur' : 'Panel Juruwang') ?></h1>
                 <p><?= admin_escape((string) $_SESSION['admin_name']) ?> · <?= admin_escape(admin_role_label($userRole)) ?></p>
             </div>

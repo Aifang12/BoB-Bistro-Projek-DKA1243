@@ -26,10 +26,10 @@ body {
 }
 
 .receipt-brand {
-    margin: 0;
-    color: #c73939;
-    font-size: 1.3rem;
-    font-weight: 700;
+    width: 170px;
+    height: 68px;
+    margin: 0 auto;
+    object-fit: contain;
 }
 
 .receipt-header h1 {

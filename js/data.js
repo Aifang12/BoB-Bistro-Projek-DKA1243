@@ -85,4 +85,8 @@ function getActiveTable() {
     return localStorage.getItem('activeTable');
 }
 
+window.loadFoods = loadFoods;
+window.createFoodCard = createFoodCard;
+window.getActiveTable = getActiveTable;
+
 initializeTableSession();
