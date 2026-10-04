@@ -560,6 +560,65 @@ try {
             exit;
         }
 
+        if ($action === 'delete_menu') {
+            if (!$isAdmin) {
+                http_response_code(403);
+                throw new InvalidArgumentException('Hanya Admin boleh memadam menu.');
+            }
+
+            $itemId = filter_var($_POST['item_id'] ?? null, FILTER_VALIDATE_INT);
+            if ($itemId === false || $itemId === null) {
+                throw new InvalidArgumentException('Item menu tidak sah.');
+            }
+
+            $conn->begin_transaction();
+            $transactionOpen = true;
+            $menuStatement = $conn->prepare(
+                'SELECT item_name FROM menu_items WHERE item_id = ? FOR UPDATE'
+            );
+            $menuStatement->bind_param('i', $itemId);
+            $menuStatement->execute();
+            $menuItem = $menuStatement->get_result()->fetch_assoc();
+            if (!$menuItem) {
+                throw new InvalidArgumentException('Menu tidak ditemui.');
+            }
+
+            $usageStatement = $conn->prepare(
+                'SELECT COUNT(*) AS usage_count FROM order_items WHERE item_id = ?'
+            );
+            $usageStatement->bind_param('i', $itemId);
+            $usageStatement->execute();
+            $hasOrderHistory = (int) $usageStatement->get_result()->fetch_assoc()['usage_count'] > 0;
+
+            if ($hasOrderHistory) {
+                $archiveMenu = $conn->prepare(
+                    'UPDATE menu_items SET is_available = 0 WHERE item_id = ?'
+                );
+                $archiveMenu->bind_param('i', $itemId);
+                $archiveMenu->execute();
+                $resultFlag = 'menu_archived';
+                $auditAction = 'Menyahaktifkan menu yang mempunyai rekod pesanan: ' . $menuItem['item_name'];
+            } else {
+                $deleteMenu = $conn->prepare('DELETE FROM menu_items WHERE item_id = ?');
+                $deleteMenu->bind_param('i', $itemId);
+                $deleteMenu->execute();
+                $resultFlag = 'menu_deleted';
+                $auditAction = 'Memadam menu: ' . $menuItem['item_name'];
+            }
+
+            admin_log_action(
+                $conn,
+                $auditAction,
+                'menu_items',
+                $itemId,
+                (int) $_SESSION['admin_user_id']
+            );
+            $conn->commit();
+            $transactionOpen = false;
+            header('Location: index.php?' . $resultFlag . '=1');
+            exit;
+        }
+
         if ($action === 'save_expense') {
             if (!$isAdmin) {
                 http_response_code(403);
@@ -990,6 +1049,9 @@ if (isset($conn) && $conn instanceof mysqli) {
         <?php if (isset($_GET['user_created'])): ?><p class="admin-message admin-success">Akaun kakitangan berjaya dicipta.</p><?php endif; ?>
         <?php if (isset($_GET['user_updated'])): ?><p class="admin-message admin-success">Akaun kakitangan berjaya dikemas kini.</p><?php endif; ?>
         <?php if (isset($_GET['expense_saved'])): ?><p class="admin-message admin-success">Perbelanjaan berjaya direkodkan.</p><?php endif; ?>
+        <?php if (isset($_GET['menu_deleted'])): ?><p class="admin-message admin-success">Menu berjaya dipadamkan.</p><?php endif; ?>
+        <?php if (isset($_GET['menu_archived'])): ?><p class="admin-message admin-success">Menu telah dinyahaktifkan kerana mempunyai rekod pesanan lama.</p><?php endif; ?>
+        <?php if (isset($_GET['menu_updated'])): ?><p class="admin-message admin-success">Menu berjaya dikemas kini.</p><?php endif; ?>
         <?php if ($error !== ''): ?><p class="admin-message admin-error"><?= admin_escape($error) ?></p><?php endif; ?>
 
         <?php if ($isAdmin): ?>
@@ -997,7 +1059,7 @@ if (isset($conn) && $conn instanceof mysqli) {
             <div class="admin-panel-heading">
                 <div>
                     <h2>Ringkasan kewangan dan laporan bulanan</h2>
-                    <p class="admin-help">Hasil ialah bayaran berjaya ditolak bayaran dipulangkan; untung ialah hasil bersih ditolak perbelanjaan.</p>
+                    <!-- <p class="admin-help">Hasil ialah bayaran berjaya ditolak bayaran dipulangkan; untung ialah hasil bersih ditolak perbelanjaan.</p> -->
                 </div>
                 <form method="get" class="admin-month-filter">
                     <label for="report-month">Bulan laporan</label>
@@ -1316,39 +1378,45 @@ if (isset($conn) && $conn instanceof mysqli) {
                 <p>Belum ada menu untuk dipaparkan.</p>
             <?php else: ?>
                 <div class="admin-table-wrap">
-                    <table class="admin-table">
-                        <thead><tr><th>Nama</th><th>Kategori</th><th>Harga</th><th>Status dan kemas kini</th></tr></thead>
+                    <table class="admin-table admin-menu-table">
+                        <thead><tr><th>Menu</th><th>Kategori</th><th>Harga</th><th>Status</th><th>Tindakan</th></tr></thead>
                         <tbody>
                             <?php foreach ($menuItems as $item): ?>
                                 <tr>
+                                    <td><strong><?= admin_escape($item['item_name']) ?></strong></td>
+                                    <td><?= admin_escape($item['category_name']) ?></td>
+                                    <td>RM <?= number_format((float) $item['price'], 2) ?></td>
+                                    <td><span class="admin-menu-status<?= (int) $item['is_available'] === 1 ? ' is-available' : '' ?>"><?= (int) $item['is_available'] === 1 ? 'Tersedia' : 'Tidak tersedia' ?></span></td>
                                     <td>
-                                        <form id="menu-edit-<?= (int) $item['item_id'] ?>" method="post" class="admin-menu-edit">
-                                            <input type="hidden" name="csrf_token" value="<?= admin_escape(admin_csrf_token()) ?>">
-                                            <input type="hidden" name="action" value="update_menu">
-                                            <input type="hidden" name="item_id" value="<?= (int) $item['item_id'] ?>">
-                                        </form>
-                                        <div class="admin-menu-edit">
-                                            <label>Nama<input form="menu-edit-<?= (int) $item['item_id'] ?>" name="item_name" maxlength="150" value="<?= admin_escape($item['item_name']) ?>" required></label>
-                                            <label>Penerangan<textarea form="menu-edit-<?= (int) $item['item_id'] ?>" name="description" rows="2"><?= admin_escape($item['description'] ?? '') ?></textarea></label>
-                                    </td>
-                                    <td>
-                                        <label>Kategori
-                                            <select form="menu-edit-<?= (int) $item['item_id'] ?>" name="category_id" required>
-                                                <?php foreach ($categories as $category): ?>
-                                                    <option value="<?= (int) $category['category_id'] ?>"<?= (int) $category['category_id'] === (int) $item['category_id'] ? ' selected' : '' ?>><?= admin_escape($category['category_name']) ?></option>
-                                                <?php endforeach; ?>
-                                            </select>
-                                        </label>
-                                    </td>
-                                    <td><label>Harga (RM)<input form="menu-edit-<?= (int) $item['item_id'] ?>" name="price" inputmode="decimal" value="<?= number_format((float) $item['price'], 2, '.', '') ?>" required></label></td>
-                                    <td>
-                                        <label>Ketersediaan
-                                            <select form="menu-edit-<?= (int) $item['item_id'] ?>" name="is_available">
-                                                <option value="1"<?= (int) $item['is_available'] === 1 ? ' selected' : '' ?>>Tersedia</option>
-                                                <option value="0"<?= (int) $item['is_available'] === 0 ? ' selected' : '' ?>>Tidak tersedia</option>
-                                            </select>
-                                        </label>
-                                        <button class="admin-button" type="submit" form="menu-edit-<?= (int) $item['item_id'] ?>">Simpan Perubahan</button>
+                                        <div class="admin-menu-actions">
+                                            <button
+                                                class="admin-icon-button admin-edit-menu"
+                                                type="button"
+                                                aria-label="Edit <?= admin_escape($item['item_name']) ?>"
+                                                title="Edit menu"
+                                                data-item-id="<?= (int) $item['item_id'] ?>"
+                                                data-item-name="<?= admin_escape($item['item_name']) ?>"
+                                                data-description="<?= admin_escape($item['description'] ?? '') ?>"
+                                                data-category-id="<?= (int) $item['category_id'] ?>"
+                                                data-price="<?= admin_escape(number_format((float) $item['price'], 2, '.', '')) ?>"
+                                                data-available="<?= (int) $item['is_available'] ?>"
+                                            >
+                                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg>
+                                            </button>
+                                            <form method="post" class="admin-delete-menu-form">
+                                                <input type="hidden" name="csrf_token" value="<?= admin_escape(admin_csrf_token()) ?>">
+                                                <input type="hidden" name="action" value="delete_menu">
+                                                <input type="hidden" name="item_id" value="<?= (int) $item['item_id'] ?>">
+                                                <button
+                                                    class="admin-icon-button admin-delete-menu"
+                                                    type="submit"
+                                                    aria-label="Padam <?= admin_escape($item['item_name']) ?>"
+                                                    title="Padam menu"
+                                                    data-item-name="<?= admin_escape($item['item_name']) ?>"
+                                                >
+                                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="m19 6-1 14H6L5 6"/><path d="M10 11v5M14 11v5"/></svg>
+                                                </button>
+                                            </form>
                                         </div>
                                     </td>
                                 </tr>
@@ -1358,6 +1426,63 @@ if (isset($conn) && $conn instanceof mysqli) {
                 </div>
             <?php endif; ?>
         </section>
+
+        <dialog class="admin-menu-dialog" id="edit-menu-dialog" aria-labelledby="edit-menu-title">
+            <form method="post" class="admin-form admin-menu-modal-form">
+                <input type="hidden" name="csrf_token" value="<?= admin_escape(admin_csrf_token()) ?>">
+                <input type="hidden" name="action" value="update_menu">
+                <input type="hidden" name="item_id" id="edit-item-id">
+                <div class="admin-panel-heading">
+                    <h2 id="edit-menu-title">Edit menu</h2>
+                    <button class="admin-icon-button admin-dialog-close" type="button" aria-label="Tutup dialog">×</button>
+                </div>
+                <label>Nama menu<input name="item_name" id="edit-item-name" maxlength="150" required></label>
+                <label>Kategori
+                    <select name="category_id" id="edit-category-id" required>
+                        <?php foreach ($categories as $category): ?>
+                            <option value="<?= (int) $category['category_id'] ?>"><?= admin_escape($category['category_name']) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </label>
+                <label>Harga (RM)<input name="price" id="edit-item-price" inputmode="decimal" pattern="[0-9]+(\.[0-9]{1,2})?" required></label>
+                <label>Ketersediaan
+                    <select name="is_available" id="edit-item-available">
+                        <option value="1">Tersedia</option>
+                        <option value="0">Tidak tersedia</option>
+                    </select>
+                </label>
+                <label>Penerangan<textarea name="description" id="edit-item-description" rows="4"></textarea></label>
+                <div class="admin-menu-dialog-actions">
+                    <button class="admin-button admin-button-secondary admin-dialog-cancel" type="button">Batal</button>
+                    <button class="admin-button" type="submit">Simpan Perubahan</button>
+                </div>
+            </form>
+        </dialog>
+        <script>
+            const menuDialog = document.getElementById('edit-menu-dialog');
+            document.querySelectorAll('.admin-edit-menu').forEach((button) => {
+                button.addEventListener('click', () => {
+                    document.getElementById('edit-item-id').value = button.dataset.itemId;
+                    document.getElementById('edit-item-name').value = button.dataset.itemName;
+                    document.getElementById('edit-item-description').value = button.dataset.description;
+                    document.getElementById('edit-category-id').value = button.dataset.categoryId;
+                    document.getElementById('edit-item-price').value = button.dataset.price;
+                    document.getElementById('edit-item-available').value = button.dataset.available;
+                    menuDialog.showModal();
+                });
+            });
+            document.querySelectorAll('.admin-dialog-close, .admin-dialog-cancel').forEach((button) => {
+                button.addEventListener('click', () => menuDialog.close());
+            });
+            document.querySelectorAll('.admin-delete-menu-form').forEach((form) => {
+                form.addEventListener('submit', (event) => {
+                    const itemName = form.querySelector('.admin-delete-menu').dataset.itemName;
+                    if (!window.confirm(`Padam menu "${itemName}"? Jika menu pernah dipesan, ia akan dinyahaktifkan supaya rekod pesanan kekal.`)) {
+                        event.preventDefault();
+                    }
+                });
+            });
+        </script>
         <?php endif; ?>
     </main>
 </body>

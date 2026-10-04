@@ -188,19 +188,12 @@
 
 .admin-month-filter label,
 .admin-expense-form label,
-.admin-menu-edit label {
-    display: grid;
-    gap: 6px;
-    font-size: .9rem;
-    font-weight: 600;
-}
-
 .admin-month-filter input,
 .admin-expense-form input,
 .admin-expense-form select,
-.admin-menu-edit input,
-.admin-menu-edit select,
-.admin-menu-edit textarea {
+.admin-menu-modal-form input,
+.admin-menu-modal-form select,
+.admin-menu-modal-form textarea {
     min-height: 40px;
     padding: 8px 10px;
     border: 1px solid #d8d8df;
@@ -331,14 +324,126 @@
     color: var(--text-light);
 }
 
-.admin-menu-edit {
-    display: grid;
-    min-width: 210px;
-    gap: 10px;
+.admin-menu-table {
+    min-width: 560px;
 }
 
-.admin-menu-edit textarea {
+.admin-menu-table th,
+.admin-menu-table td {
+    padding: 10px 12px;
+    vertical-align: middle;
+}
+
+.admin-menu-table td:first-child strong {
+    font-weight: 600;
+}
+
+.admin-menu-status {
+    display: inline-block;
+    padding: 4px 9px;
+    border-radius: 999px;
+    color: #6d4b12;
+    background: #fff4d8;
+    font-size: .82rem;
+    white-space: nowrap;
+}
+
+.admin-menu-status.is-available {
+    color: #176632;
+    background: #eaf8ef;
+}
+
+.admin-menu-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.admin-delete-menu-form {
+    margin: 0;
+}
+
+.admin-icon-button {
+    display: inline-grid;
+    width: 40px;
+    height: 40px;
+    padding: 9px;
+    place-items: center;
+    border: 1px solid #dedee4;
+    border-radius: 9px;
+    color: #454550;
+    background: #fff;
+    cursor: pointer;
+}
+
+.admin-icon-button:hover {
+    background: #f5f5f7;
+}
+
+.admin-icon-button svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.8;
+}
+
+.admin-delete-menu {
+    color: #a82d2d;
+}
+
+.admin-menu-dialog {
+    position: fixed;
+    inset: 50% auto auto 50%;
+    margin: 0;
+    transform: translate(-50%, -50%);
+    width: min(540px, calc(100% - 32px));
+    max-height: min(88vh, 760px);
+    padding: 26px;
+    border: 0;
+    border-radius: 16px;
+    box-shadow: 0 18px 60px rgba(0, 0, 0, .24);
+}
+
+.admin-menu-dialog::backdrop {
+    background: rgba(25, 25, 31, .58);
+}
+
+.admin-menu-modal-form {
+    gap: 15px;
+}
+
+.admin-menu-modal-form label {
+    display: grid;
+    gap: 6px;
+    font-size: .92rem;
+    font-weight: 600;
+}
+
+.admin-menu-modal-form textarea {
     resize: vertical;
+}
+
+.admin-menu-dialog .admin-panel-heading {
+    align-items: center;
+}
+
+.admin-menu-dialog .admin-panel-heading h2 {
+    margin: 0;
+}
+
+.admin-dialog-close {
+    font-size: 1.4rem;
+    line-height: 1;
+}
+
+.admin-menu-dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 8px;
 }
 
 .admin-receipt-link {
