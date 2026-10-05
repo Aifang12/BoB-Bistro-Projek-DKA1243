@@ -17,6 +17,8 @@ $tables = [];
 $users = [];
 $sessions = [];
 $kitchenMenu = [];
+$cashierMenu = [];
+$panelMenuItems = [];
 $expenseCategories = [];
 $recentExpenses = [];
 $monthlySales = [];
@@ -805,6 +807,21 @@ try {
     $error = 'Tindakan tidak dapat diselesaikan. Sila semak log sistem.';
 }
 
+$adminSectionAfterAction = $isAdmin ? 'finance' : 'orders';
+if ($isAdmin && isset($_GET['expense_saved'])) {
+    $adminSectionAfterAction = 'expenses';
+} elseif ($isAdmin && (isset($_GET['user_created']) || isset($_GET['user_updated']))) {
+    $adminSectionAfterAction = 'staff';
+} elseif ($isAdmin && (isset($_GET['menu_updated']) || isset($_GET['menu_deleted']) || isset($_GET['menu_archived']))) {
+    $adminSectionAfterAction = 'menu-list';
+} elseif ($isAdmin && isset($_GET['saved'])) {
+    $adminSectionAfterAction = 'menu-create';
+} elseif (isset($_GET['order_updated'])) {
+    $adminSectionAfterAction = 'orders';
+} elseif (($isAdmin || $userRole === 'Cashier') && isset($_GET['table_updated'])) {
+    $adminSectionAfterAction = 'tables';
+}
+
 if (isset($conn) && $conn instanceof mysqli) {
     try {
         if ($isAdmin) {
@@ -822,6 +839,7 @@ if (isset($conn) && $conn instanceof mysqli) {
                  ORDER BY menu_items.item_id DESC'
             );
             $menuItems = $menuResult->fetch_all(MYSQLI_ASSOC);
+            $panelMenuItems = $menuItems;
 
             $expenseCategories = $conn->query(
                 'SELECT expense_category_id, category_name
@@ -839,12 +857,13 @@ if (isset($conn) && $conn instanceof mysqli) {
             ];
             $monthlySales = $reportData['timeline'];
             $chartYear = (int) $reportPeriod['start']->format('Y');
-            $chartMax = max(
+            $chartSalesMax = max(
                 1,
-                ...array_map(
-                    static fn (array $row): float => max(abs($row['revenue']), $row['expenses']),
-                    $monthlySales
-                )
+                ...array_map(static fn (array $row): float => abs($row['revenue']), $monthlySales)
+            );
+            $chartExpenseMax = max(
+                1,
+                ...array_map(static fn (array $row): float => $row['expenses'], $monthlySales)
             );
             $reportFilterKey = $reportPeriod['period'] === 'week'
                 ? 'date'
@@ -951,6 +970,17 @@ if (isset($conn) && $conn instanceof mysqli) {
                  ORDER BY categories.category_name, menu_items.item_name'
             );
             $kitchenMenu = $kitchenMenuResult->fetch_all(MYSQLI_ASSOC);
+            $panelMenuItems = $kitchenMenu;
+        } elseif ($userRole === 'Cashier') {
+            $cashierMenuResult = $conn->query(
+                'SELECT menu_items.item_name, menu_items.image_path, categories.category_name
+                 FROM menu_items
+                 INNER JOIN categories ON categories.category_id = menu_items.category_id
+                 WHERE menu_items.is_available = 1 AND categories.is_active = 1
+                 ORDER BY categories.category_name, menu_items.item_name'
+            );
+            $cashierMenu = $cashierMenuResult->fetch_all(MYSQLI_ASSOC);
+            $panelMenuItems = $cashierMenu;
         }
     } catch (Throwable $exception) {
         error_log('Admin menu listing error: ' . $exception->getMessage());
@@ -965,9 +995,9 @@ if (isset($conn) && $conn instanceof mysqli) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= admin_escape($isAdmin ? 'Panel Pentadbir' : ($userRole === 'Kitchen' ? 'Panel Dapur' : 'Panel Juruwang')) ?> | B@Bistro</title>
     <link rel="stylesheet" href="../css/style.css">
-    <link rel="stylesheet" href="admin.css?v=3">
+    <link rel="stylesheet" href="admin.css?v=10">
 </head>
-<body>
+<body data-admin-section-default="<?= admin_escape($adminSectionAfterAction) ?>">
     <main class="admin-page">
         <header class="admin-header">
             <div>
@@ -993,42 +1023,63 @@ if (isset($conn) && $conn instanceof mysqli) {
         <?php if ($error !== ''): ?><p class="admin-message admin-error"><?= admin_escape($error) ?></p><?php endif; ?>
 
         <?php if ($isAdmin): ?>
-        <section class="admin-panel">
-            <div class="admin-panel-heading">
+        <nav class="admin-panel-nav" aria-label="Navigasi panel Admin">
+            <a class="admin-panel-nav-link" href="#admin-section-finance" data-admin-tab="finance">Kewangan &amp; laporan</a>
+            <a class="admin-panel-nav-link" href="#admin-section-expenses" data-admin-tab="expenses">Perbelanjaan</a>
+            <a class="admin-panel-nav-link" href="#admin-section-orders" data-admin-tab="orders">Pesanan</a>
+            <a class="admin-panel-nav-link" href="#admin-section-tables" data-admin-tab="tables">Meja</a>
+            <a class="admin-panel-nav-link" href="#admin-section-menu-create" data-admin-tab="menu-create">Tambah menu</a>
+            <a class="admin-panel-nav-link" href="#admin-section-menu-list" data-admin-tab="menu-list">Senarai menu</a>
+            <a class="admin-panel-nav-link" href="#admin-section-staff" data-admin-tab="staff">Kakitangan</a>
+        </nav>
+        <?php elseif ($userRole === 'Kitchen'): ?>
+        <nav class="admin-panel-nav" aria-label="Navigasi panel Dapur">
+            <a class="admin-panel-nav-link" href="#admin-section-orders" data-admin-tab="orders">Pesanan aktif</a>
+            <a class="admin-panel-nav-link" href="#admin-section-kitchen-menu" data-admin-tab="kitchen-menu">Menu sedia ada</a>
+        </nav>
+        <?php elseif ($userRole === 'Cashier'): ?>
+        <nav class="admin-panel-nav" aria-label="Navigasi panel Cashier">
+            <a class="admin-panel-nav-link" href="#admin-section-orders" data-admin-tab="orders">Semakan bil, pembayaran dan resit</a>
+            <a class="admin-panel-nav-link" href="#admin-section-cashier-sessions" data-admin-tab="cashier-sessions">Sesi meja dan semakan bil</a>
+            <a class="admin-panel-nav-link" href="#admin-section-tables" data-admin-tab="tables">Status meja</a>
+            <a class="admin-panel-nav-link" href="#admin-section-kitchen-menu" data-admin-tab="kitchen-menu">Menu sedia ada</a>
+        </nav>
+        <?php endif; ?>
+        <?php if ($isAdmin): ?>
+        <section class="admin-panel" id="admin-section-finance" data-admin-section="finance">
+            <div class="admin-panel-heading admin-finance-heading">
                 <div>
                     <h2>Kewangan dan laporan</h2>
-                    <p class="admin-help">Pilih tempoh untuk menyemak ringkasan dan jana laporan terperinci.</p>
+                    <p class="admin-help">Pilih tempoh untuk menyemak ringkasan dan jana laporan.</p>
                 </div>
                 <form method="get" class="admin-month-filter" id="report-filter">
-                    <label for="report-period">Jenis laporan</label>
-                    <select id="report-period" name="period">
-                        <option value="week"<?= $reportPeriod['period'] === 'week' ? ' selected' : '' ?>>Mingguan</option>
-                        <option value="month"<?= $reportPeriod['period'] === 'month' ? ' selected' : '' ?>>Bulanan</option>
-                        <option value="year"<?= $reportPeriod['period'] === 'year' ? ' selected' : '' ?>>Tahunan</option>
-                    </select>
-                    <label class="report-period-field" data-period="week" for="report-week"<?= $reportPeriod['period'] === 'week' ? '' : ' hidden' ?>>Pilih tarikh dalam minggu
+                    <div class="admin-report-filter-field">
+                        <label for="report-period">Jenis laporan</label>
+                        <select id="report-period" name="period">
+                            <option value="week"<?= $reportPeriod['period'] === 'week' ? ' selected' : '' ?>>Mingguan</option>
+                            <option value="month"<?= $reportPeriod['period'] === 'month' ? ' selected' : '' ?>>Bulanan</option>
+                            <option value="year"<?= $reportPeriod['period'] === 'year' ? ' selected' : '' ?>>Tahunan</option>
+                        </select>
+                    </div>
+                    <div class="admin-report-filter-field report-period-field" data-period="week"<?= $reportPeriod['period'] === 'week' ? '' : ' hidden' ?>>
+                        <label for="report-week">Pilih tarikh dalam minggu</label>
                         <input id="report-week" type="date" name="date" value="<?= admin_escape($reportPeriod['period'] === 'week' ? $reportPeriod['selection'] : date('Y-m-d')) ?>">
-                    </label>
-                    <label class="report-period-field" data-period="month" for="report-month"<?= $reportPeriod['period'] === 'month' ? '' : ' hidden' ?>>Pilih bulan
+                    </div>
+                    <div class="admin-report-filter-field report-period-field" data-period="month"<?= $reportPeriod['period'] === 'month' ? '' : ' hidden' ?>>
+                        <label for="report-month">Pilih bulan</label>
                         <input id="report-month" type="month" name="month" value="<?= admin_escape($reportPeriod['period'] === 'month' ? $reportPeriod['selection'] : date('Y-m')) ?>">
-                    </label>
-                    <label class="report-period-field" data-period="year" for="report-year"<?= $reportPeriod['period'] === 'year' ? '' : ' hidden' ?>>Pilih tahun
+                    </div>
+                    <div class="admin-report-filter-field report-period-field" data-period="year"<?= $reportPeriod['period'] === 'year' ? '' : ' hidden' ?>>
+                        <label for="report-year">Pilih tahun</label>
                         <input id="report-year" type="number" name="year" min="1000" max="9998" step="1" value="<?= admin_escape($reportPeriod['period'] === 'year' ? $reportPeriod['selection'] : date('Y')) ?>">
-                    </label>
+                    </div>
                     <button class="admin-button" type="submit">Papar</button>
                 </form>
             </div>
             <p class="admin-report-period"><?= admin_escape($reportPeriod['label']) ?> · <?= admin_escape($reportPeriod['start']->format('d/m/Y')) ?> – <?= admin_escape($reportPeriod['end']->modify('-1 day')->format('d/m/Y')) ?></p>
-            <?php if ($reportData !== null && ($reportData['summary']['test_order_count'] + $reportData['summary']['test_expense_count']) > 0): ?>
-                <p class="admin-report-warning" role="note">
-                    Tempoh ini mengandungi <?= (int) $reportData['summary']['test_order_count'] ?> pesanan dan
-                    <?= (int) $reportData['summary']['test_expense_count'] ?> perbelanjaan data ujian.
-                    Rekod berlabel <strong>[DATA UJIAN LAPORAN]</strong> termasuk dalam jumlah di bawah.
-                </p>
-            <?php endif; ?>
             <?php if ($reportData !== null): ?>
                 <div class="admin-report-actions">
-                    <a class="admin-button" href="<?= admin_escape($reportUrl) ?>" target="_blank" rel="noopener">Jana laporan terperinci</a>
+                    <a class="admin-button" href="<?= admin_escape($reportUrl) ?>" target="_blank" rel="noopener">Jana laporan</a>
                     <a class="admin-button admin-button-secondary" href="<?= admin_escape($reportDownloadUrl) ?>">Muat turun CSV</a>
                 </div>
             <?php endif; ?>
@@ -1043,21 +1094,27 @@ if (isset($conn) && $conn instanceof mysqli) {
             </div>
             <h3>Trend hasil bersih dan perbelanjaan · <?= admin_escape($reportPeriod['label']) ?></h3>
             <div class="admin-chart-legend"><span class="admin-legend-sales">Jualan bersih</span><span class="admin-legend-expenses">Perbelanjaan</span></div>
-            <div class="admin-chart" style="--chart-count: <?= count($monthlySales) ?>" role="img" aria-label="Graf jualan bersih dan perbelanjaan bagi <?= admin_escape($reportPeriod['label']) ?>">
-                <?php foreach ($monthlySales as $monthData): ?>
-                    <div class="admin-chart-month">
-                        <div class="admin-chart-bars">
-                            <span class="admin-chart-bar admin-chart-sales" title="Jualan <?= admin_escape($monthData['label']) ?>: RM <?= number_format($monthData['revenue'], 2) ?>" style="height: <?= max(2, (int) round(abs($monthData['revenue']) / $chartMax * 100)) ?>%"></span>
-                            <span class="admin-chart-bar admin-chart-expense" title="Perbelanjaan <?= admin_escape($monthData['label']) ?>: RM <?= number_format($monthData['expenses'], 2) ?>" style="height: <?= max(2, (int) round($monthData['expenses'] / $chartMax * 100)) ?>%"></span>
+            <div class="admin-chart-scroll" tabindex="0" role="region" aria-label="Graf boleh ditatal mendatar">
+                <div class="admin-chart" style="--chart-count: <?= count($monthlySales) ?>" role="img" aria-label="Graf jualan bersih dan perbelanjaan bagi <?= admin_escape($reportPeriod['label']) ?>">
+                    <?php foreach ($monthlySales as $monthData): ?>
+                        <div class="admin-chart-month">
+                            <div class="admin-chart-bars">
+                                <span class="admin-chart-bar admin-chart-sales" title="Jualan bersih <?= admin_escape($monthData['label']) ?>: RM <?= number_format($monthData['revenue'], 2) ?>"<?= $monthData['revenue'] == 0.0 ? ' hidden' : '' ?> style="height: <?= max(5, (int) round(abs($monthData['revenue']) / $chartSalesMax * 100)) ?>%"></span>
+                                <span class="admin-chart-bar admin-chart-expense" title="Perbelanjaan <?= admin_escape($monthData['label']) ?>: RM <?= number_format($monthData['expenses'], 2) ?>"<?= $monthData['expenses'] == 0.0 ? ' hidden' : '' ?> style="height: <?= max(5, (int) round($monthData['expenses'] / $chartExpenseMax * 100)) ?>%"></span>
+                            </div>
+                            <span><?= admin_escape($monthData['label']) ?></span>
                         </div>
-                        <span><?= admin_escape($monthData['label']) ?></span>
-                    </div>
-                <?php endforeach; ?>
+                    <?php endforeach; ?>
+                </div>
             </div>
+            <label class="admin-chart-slider" for="admin-chart-slider">
+                <input id="admin-chart-slider" type="range" min="0" max="1000" value="0" step="1" aria-label="Skrol graf jualan dan perbelanjaan">
+            </label>
+            <p class="admin-help">Skala bar jualan dan perbelanjaan adalah berasingan supaya kedua-duanya mudah dilihat. Arahkan kursor pada bar untuk melihat amaun sebenar.</p>
             <p class="admin-help">Hasil bersih mengira bayaran berjaya selepas ditolak bayaran dipulangkan. Bayaran belum selesai tidak dianggap hasil. Perbelanjaan dikelaskan mengikut tarikh perbelanjaan.</p>
         </section>
 
-        <section class="admin-panel">
+        <section class="admin-panel" id="admin-section-expenses" data-admin-section="expenses">
             <h2>Rekod perbelanjaan</h2>
             <form method="post" class="admin-form admin-expense-form">
                 <input type="hidden" name="csrf_token" value="<?= admin_escape(admin_csrf_token()) ?>">
@@ -1100,7 +1157,7 @@ if (isset($conn) && $conn instanceof mysqli) {
         <?php endif; ?>
 
         <?php if ($userRole === 'Cashier'): ?>
-        <section class="admin-panel">
+        <section class="admin-panel" id="admin-section-cashier-sessions" data-admin-section="cashier-sessions">
             <h2>Sesi meja dan semakan bil</h2>
             <?php if ($sessions === []): ?>
                 <p>Tiada sesi meja aktif.</p>
@@ -1129,26 +1186,38 @@ if (isset($conn) && $conn instanceof mysqli) {
         </section>
         <?php endif; ?>
 
-        <?php if ($userRole === 'Kitchen'): ?>
-        <section class="admin-panel">
-            <h2>Menu tersedia daripada pangkalan data</h2>
-            <?php if ($kitchenMenu === []): ?>
+        <?php if (in_array($userRole, ['Kitchen', 'Cashier'], true)): ?>
+        <section class="admin-panel" id="admin-section-kitchen-menu" data-admin-section="kitchen-menu">
+            <div class="admin-menu-heading">
+                <h2>Menu sedia ada</h2>
+                <label class="admin-menu-category-filter">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M7 12h10m-7 5h4"/><path d="m8 4-2 3 2 3m8 4 2 3-2 3"/></svg>
+                    <select data-menu-category-filter aria-label="Asingkan menu mengikut kategori">
+                        <option value="">Semua kategori</option>
+                        <?php foreach (array_unique(array_column($panelMenuItems, 'category_name')) as $menuCategory): ?>
+                            <option value="<?= admin_escape($menuCategory) ?>"><?= admin_escape($menuCategory) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </label>
+            </div>
+            <?php if ($panelMenuItems === []): ?>
                 <p>Tiada menu tersedia buat masa ini.</p>
             <?php else: ?>
-                <div class="admin-kitchen-menu">
-                    <?php foreach ($kitchenMenu as $menuItem): ?>
-                        <article>
+                <div class="admin-kitchen-menu" data-menu-category-list>
+                    <?php foreach ($panelMenuItems as $menuItem): ?>
+                        <article data-menu-category="<?= admin_escape($menuItem['category_name']) ?>">
                             <?php if (!empty($menuItem['image_path'])): ?><img src="../<?= admin_escape($menuItem['image_path']) ?>" alt=""><?php endif; ?>
                             <div><strong><?= admin_escape($menuItem['item_name']) ?></strong><span><?= admin_escape($menuItem['category_name']) ?></span></div>
                         </article>
                     <?php endforeach; ?>
                 </div>
+                <p class="admin-help" data-menu-filter-empty hidden>Tiada menu dalam kategori ini.</p>
             <?php endif; ?>
         </section>
         <?php endif; ?>
 
-        <section class="admin-panel">
-            <h2><?= $userRole === 'Kitchen' ? 'Pesanan dapur aktif' : ($userRole === 'Cashier' ? 'Semakan bil, pembayaran dan resit' : 'Pesanan terkini') ?></h2>
+        <section class="admin-panel"<?= $isAdmin || $userRole === 'Kitchen' || $userRole === 'Cashier' ? ' id="admin-section-orders" data-admin-section="orders"' : '' ?>>
+            <h2><?= $userRole === 'Kitchen' ? 'Pesanan aktif' : ($userRole === 'Cashier' ? 'Semakan bil, pembayaran dan resit' : 'Pesanan terkini') ?></h2>
             <p class="admin-help">
                 <?= $canManagePayments
                     ? 'Semak item dan jumlah bil. Sahkan pembayaran setelah diterima; pesanan yang diserahkan dan dibayar boleh ditutup serta resitnya dicetak.'
@@ -1232,7 +1301,7 @@ if (isset($conn) && $conn instanceof mysqli) {
         </section>
 
         <?php if ($canManageTables): ?>
-        <section class="admin-panel">
+        <section class="admin-panel"<?= $isAdmin || $userRole === 'Cashier' ? ' id="admin-section-tables" data-admin-section="tables"' : '' ?>>
                     <h2>Status meja</h2>
                     <div class="admin-table-wrap">
                         <table class="admin-table">
@@ -1263,7 +1332,7 @@ if (isset($conn) && $conn instanceof mysqli) {
         <?php endif; ?>
 
         <?php if ($isAdmin): ?>
-        <section class="admin-panel">
+        <section class="admin-panel" id="admin-section-menu-create" data-admin-section="menu-create">
                     <h2>Tambah menu baharu</h2>
             <?php if ($categories === []): ?>
                 <p class="admin-message admin-error">Tiada kategori aktif. Aktifkan kategori terlebih dahulu dalam pangkalan data.</p>
@@ -1288,7 +1357,7 @@ if (isset($conn) && $conn instanceof mysqli) {
             <?php endif; ?>
         </section>
 
-        <section class="admin-panel">
+        <section class="admin-panel" id="admin-section-staff" data-admin-section="staff">
             <h2>Akaun kakitangan</h2>
             <form method="post" class="admin-form admin-menu-form">
         <input type="hidden" name="csrf_token" value="<?= admin_escape(admin_csrf_token()) ?>">
@@ -1340,8 +1409,19 @@ if (isset($conn) && $conn instanceof mysqli) {
             </div>
         </section>
 
-        <section class="admin-panel">
-            <h2>Menu dalam pangkalan data</h2>
+        <section class="admin-panel" id="admin-section-menu-list" data-admin-section="menu-list">
+            <div class="admin-menu-heading">
+                <h2>Menu sedia ada</h2>
+                <label class="admin-menu-category-filter">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M7 12h10m-7 5h4"/><path d="m8 4-2 3 2 3m8 4 2 3-2 3"/></svg>
+                    <select data-menu-category-filter aria-label="Asingkan menu mengikut kategori">
+                        <option value="">Semua kategori</option>
+                        <?php foreach (array_unique(array_column($panelMenuItems, 'category_name')) as $menuCategory): ?>
+                            <option value="<?= admin_escape($menuCategory) ?>"><?= admin_escape($menuCategory) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </label>
+            </div>
             <?php if (($menuItems ?? []) === []): ?>
                 <p>Belum ada menu untuk dipaparkan.</p>
             <?php else: ?>
@@ -1350,7 +1430,7 @@ if (isset($conn) && $conn instanceof mysqli) {
                         <thead><tr><th>Menu</th><th>Kategori</th><th>Harga</th><th>Status</th><th>Tindakan</th></tr></thead>
                         <tbody>
                             <?php foreach ($menuItems as $item): ?>
-                                <tr>
+                                <tr data-menu-category="<?= admin_escape($item['category_name']) ?>">
                                     <td><strong><?= admin_escape($item['item_name']) ?></strong></td>
                                     <td><?= admin_escape($item['category_name']) ?></td>
                                     <td>RM <?= number_format((float) $item['price'], 2) ?></td>
@@ -1392,6 +1472,7 @@ if (isset($conn) && $conn instanceof mysqli) {
                         </tbody>
                     </table>
                 </div>
+                <p class="admin-help" data-menu-filter-empty hidden>Tiada menu dalam kategori ini.</p>
             <script>
                 const reportPeriodSelect = document.getElementById('report-period');
                 reportPeriodSelect?.addEventListener('change', () => {
@@ -1403,6 +1484,26 @@ if (isset($conn) && $conn instanceof mysqli) {
                         input.required = isActive;
                     });
                 });
+
+                const reportChart = document.querySelector('.admin-chart-scroll');
+                const reportChartSlider = document.getElementById('admin-chart-slider');
+                if (reportChart && reportChartSlider) {
+                    const updateReportChartSlider = () => {
+                        const maxScroll = reportChart.scrollWidth - reportChart.clientWidth;
+                        reportChartSlider.closest('.admin-chart-slider').hidden = maxScroll <= 0;
+                        reportChartSlider.value = maxScroll > 0
+                            ? String(Math.round(reportChart.scrollLeft / maxScroll * Number(reportChartSlider.max)))
+                            : '0';
+                    };
+
+                    reportChart.addEventListener('scroll', updateReportChartSlider, { passive: true });
+                    reportChartSlider.addEventListener('input', () => {
+                        const maxScroll = reportChart.scrollWidth - reportChart.clientWidth;
+                        reportChart.scrollLeft = maxScroll * Number(reportChartSlider.value) / Number(reportChartSlider.max);
+                    });
+                    window.addEventListener('resize', updateReportChartSlider);
+                    updateReportChartSlider();
+                }
             </script>
             <?php endif; ?>
         </section>
@@ -1464,6 +1565,66 @@ if (isset($conn) && $conn instanceof mysqli) {
             });
         </script>
         <?php endif; ?>
+        <script>
+            const panelTabs = [...document.querySelectorAll('[data-admin-tab]')];
+            const panelSections = [...document.querySelectorAll('[data-admin-section]')];
+            document.querySelectorAll('[data-menu-category-filter]').forEach((filter) => {
+                filter.addEventListener('change', () => {
+                    const menuSection = filter.closest('[data-admin-section]');
+                    const menuItems = [...menuSection.querySelectorAll('[data-menu-category]')];
+                    let visibleMenuCount = 0;
+
+                    menuItems.forEach((menuItem) => {
+                        const isVisible = filter.value === '' || menuItem.dataset.menuCategory === filter.value;
+                        menuItem.hidden = !isVisible;
+                        visibleMenuCount += Number(isVisible);
+                    });
+
+                    const emptyMessage = menuSection.querySelector('[data-menu-filter-empty]');
+                    if (emptyMessage) {
+                        emptyMessage.hidden = visibleMenuCount !== 0;
+                    }
+                });
+            });
+
+            if (panelTabs.length && panelSections.length) {
+                const validPanelSections = new Set(panelSections.map((section) => section.dataset.adminSection));
+                const showPanelSection = (sectionName) => {
+                    if (!validPanelSections.has(sectionName)) {
+                        return;
+                    }
+
+                    panelSections.forEach((section) => {
+                        section.hidden = section.dataset.adminSection !== sectionName;
+                    });
+                    panelTabs.forEach((tab) => {
+                        if (tab.dataset.adminTab === sectionName) {
+                            tab.setAttribute('aria-current', 'page');
+                        } else {
+                            tab.removeAttribute('aria-current');
+                        }
+                    });
+                };
+                const panelSectionFromHash = () => {
+                    const sectionName = window.location.hash.replace('#admin-section-', '');
+                    return validPanelSections.has(sectionName)
+                        ? sectionName
+                        : document.body.dataset.adminSectionDefault;
+                };
+
+                panelTabs.forEach((tab) => {
+                    tab.addEventListener('click', (event) => {
+                        event.preventDefault();
+                        const sectionName = tab.dataset.adminTab;
+                        history.pushState(null, '', `#admin-section-${sectionName}`);
+                        showPanelSection(sectionName);
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    });
+                });
+                window.addEventListener('popstate', () => showPanelSection(panelSectionFromHash()));
+                showPanelSection(panelSectionFromHash());
+            }
+        </script>
     </main>
 </body>
 </html>

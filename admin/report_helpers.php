@@ -113,7 +113,8 @@ function admin_load_financial_report(mysqli $conn, array $period): array
                 payments.amount, payments.transaction_reference, payments.created_at AS payment_created_at,
                 payments.paid_at, payments.recorded_by AS payment_recorded_by,
                 users.full_name AS recorded_by,
-                receipts.receipt_id, receipts.receipt_number, receipts.issued_at AS receipt_issued_at
+                receipts.receipt_id, receipts.receipt_number, receipts.issued_at AS receipt_issued_at,
+                report_test_orders.sample_key AS test_sample_key
          FROM payments
          INNER JOIN orders ON orders.order_id = payments.order_id
          INNER JOIN table_sessions ON table_sessions.session_id = orders.session_id
@@ -121,6 +122,7 @@ function admin_load_financial_report(mysqli $conn, array $period): array
          LEFT JOIN users AS order_creator ON order_creator.user_id = orders.created_by
          LEFT JOIN users ON users.user_id = payments.recorded_by
          LEFT JOIN receipts ON receipts.payment_id = payments.payment_id
+         LEFT JOIN report_test_orders ON report_test_orders.order_id = orders.order_id
          WHERE payments.created_at >= ? AND payments.created_at < ?
          ORDER BY payments.created_at, orders.order_number'
     );
@@ -162,9 +164,7 @@ function admin_load_financial_report(mysqli $conn, array $period): array
     unset($order);
     $testOrderIds = [];
     foreach ($orders as $order) {
-        if (str_contains((string) $order['order_notes'], '[DATA UJIAN LAPORAN]')
-            || str_starts_with((string) $order['transaction_reference'], 'TEST-REPORT-')
-        ) {
+        if ($order['test_sample_key'] !== null) {
             $testOrderIds[(int) $order['order_id']] = true;
         }
     }
@@ -174,11 +174,13 @@ function admin_load_financial_report(mysqli $conn, array $period): array
                 expenses.amount, expenses.description,
                 expenses.recorded_by AS expense_recorded_by,
                 expenses.expense_date, expenses.created_at,
-                expense_categories.category_name, users.full_name AS recorded_by
+                expense_categories.category_name, users.full_name AS recorded_by,
+                report_test_expenses.sample_key AS test_sample_key
          FROM expenses
          INNER JOIN expense_categories
             ON expense_categories.expense_category_id = expenses.expense_category_id
          LEFT JOIN users ON users.user_id = expenses.recorded_by
+         LEFT JOIN report_test_expenses ON report_test_expenses.expense_id = expenses.expense_id
          WHERE expenses.expense_date >= ? AND expenses.expense_date < ?
          ORDER BY expenses.expense_date, expenses.expense_id'
     );
@@ -192,7 +194,7 @@ function admin_load_financial_report(mysqli $conn, array $period): array
     foreach ($expenses as $expense) {
         $amount = (float) $expense['amount'];
         $expenseTotal += $amount;
-        if (str_contains((string) $expense['description'], '[DATA UJIAN LAPORAN]')) {
+        if ($expense['test_sample_key'] !== null) {
             $testExpenseCount++;
         }
         $category = $expense['category_name'];

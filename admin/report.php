@@ -67,7 +67,7 @@ function report_escape(string|null $value): string
         <main class="report-document">
             <header class="report-header">
                 <img src="../images/logo/logo coloured.svg" alt="B@Bistro">
-                <h1>Laporan Kewangan Terperinci</h1>
+                <h1>Laporan Kewangan</h1>
                 <p class="report-period"><?= report_escape($report['period']['label']) ?></p>
                 <p class="report-range">
                     Tempoh: <?= report_escape($report['period']['start']->format('d/m/Y')) ?>
@@ -75,14 +75,6 @@ function report_escape(string|null $value): string
                 </p>
                 <p class="report-generated">Dijana pada <?= date('d/m/Y H:i:s') ?></p>
             </header>
-
-            <?php if (($report['summary']['test_order_count'] + $report['summary']['test_expense_count']) > 0): ?>
-                <p class="report-warning" role="note">
-                    Laporan ini mengandungi <?= (int) $report['summary']['test_order_count'] ?> pesanan dan
-                    <?= (int) $report['summary']['test_expense_count'] ?> perbelanjaan data ujian.
-                    Rekod bertanda <strong>[DATA UJIAN LAPORAN]</strong> dikekalkan dan termasuk dalam jumlah.
-                </p>
-            <?php endif; ?>
 
             <section>
                 <h2>1. Ringkasan kewangan</h2>

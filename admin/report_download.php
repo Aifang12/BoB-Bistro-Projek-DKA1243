@@ -59,11 +59,6 @@ report_csv_row($output, ['Tempoh', $period['label']]);
 report_csv_row($output, ['Dari', $period['start']->format('Y-m-d')]);
 report_csv_row($output, ['Hingga', $period['end']->modify('-1 day')->format('Y-m-d')]);
 report_csv_row($output, ['Dijana pada', date('Y-m-d H:i:s')]);
-report_csv_row($output, [
-    'Data ujian dalam tempoh',
-    (int) $report['summary']['test_order_count'] . ' pesanan; '
-        . (int) $report['summary']['test_expense_count'] . ' perbelanjaan',
-]);
 report_csv_row($output, []);
 
 report_csv_row($output, ['RINGKASAN KEWANGAN']);
