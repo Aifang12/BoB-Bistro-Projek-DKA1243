@@ -5,6 +5,28 @@ const orderNotes = document.getElementById('orderNotes');
 const placeOrderBtn = document.getElementById('placeOrderBtn');
 const checkoutTable = document.getElementById('checkoutTable');
 const checkoutError = document.getElementById('checkoutError');
+const checkoutLoading = document.getElementById('checkoutLoading');
+const ewalletChoice = document.getElementById('paymentEwallet');
+const ewalletMethods = document.getElementById('ewalletMethods');
+
+function syncEwalletOptions() {
+    const isEwalletSelected = ewalletChoice.checked;
+    ewalletMethods.hidden = !isEwalletSelected;
+    ewalletChoice.setAttribute('aria-expanded', String(isEwalletSelected));
+}
+
+function getSelectedPaymentMethod() {
+    const selectedChoice = document.querySelector('input[name="paymentChoice"]:checked')?.value;
+    if (!selectedChoice) {
+        return null;
+    }
+
+    if (selectedChoice === 'E-wallet') {
+        return document.querySelector('input[name="ewalletProvider"]:checked')?.value || null;
+    }
+
+    return selectedChoice;
+}
 
 function getCart() {
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');
@@ -144,15 +166,23 @@ async function placeOrder() {
         return;
     }
     const tableNumber = getActiveTable();
-    const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value;
+    const selectedChoice = document.querySelector('input[name="paymentChoice"]:checked')?.value;
+    const paymentMethod = getSelectedPaymentMethod();
 
-    if (!tableNumber || cart.length === 0 || !paymentMethod) {
+    if (!tableNumber || cart.length === 0 || !selectedChoice || !paymentMethod) {
+        if (selectedChoice === 'E-wallet' && !paymentMethod) {
+            showCheckoutError('Sila pilih penyedia E-wallet sebelum membuat tempahan.');
+            return;
+        }
         showCheckoutError('Sila semak meja, bakul dan kaedah pembayaran sebelum membuat tempahan.');
         return;
     }
 
     placeOrderBtn.disabled = true;
-    placeOrderBtn.textContent = 'Menyimpan tempahan...';
+    placeOrderBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Memproses...';
+    checkoutLoading.hidden = false;
+    checkoutLoading.setAttribute('aria-hidden', 'false');
+    document.body.setAttribute('aria-busy', 'true');
 
     try {
         const response = await fetch('api/orders.php', {
@@ -177,12 +207,20 @@ async function placeOrder() {
         localStorage.removeItem('cart');
         window.location.href = `order-status.html?order=${encodeURIComponent(result.order.order_number)}`;
     } catch (error) {
+        checkoutLoading.hidden = true;
+        checkoutLoading.setAttribute('aria-hidden', 'true');
+        document.body.removeAttribute('aria-busy');
         showCheckoutError(error.message || 'Tempahan tidak dapat disimpan. Sila cuba lagi.');
         placeOrderBtn.disabled = false;
         placeOrderBtn.innerHTML = '<i class="bi bi-check-circle"></i> Buat Tempahan';
     }
 }
 
+document.querySelectorAll('input[name="paymentChoice"]').forEach(input => {
+    input.addEventListener('change', syncEwalletOptions);
+});
+
+syncEwalletOptions();
 placeOrderBtn.addEventListener('click', placeOrder);
 
 async function initializeCheckout() {

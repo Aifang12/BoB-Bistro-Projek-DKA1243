@@ -1,0 +1,2 @@
+RewriteEngine On
+RewriteRule ^waiter/order/?$ waiter/order/index.php [L,QSA]

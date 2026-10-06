@@ -277,6 +277,50 @@
     background: #fff0f0;
 }
 
+.checkout-loading[hidden] {
+    display: none;
+}
+
+.checkout-loading {
+    position: fixed;
+    z-index: 20;
+    inset: 0;
+    display: grid;
+    align-content: center;
+    justify-items: center;
+    gap: 10px;
+    padding: 24px;
+    color: #292932;
+    background: rgb(255 255 255 / 94%);
+    text-align: center;
+}
+
+.checkout-loading-spinner {
+    width: 48px;
+    height: 48px;
+    border: 5px solid #f2dada;
+    border-top-color: var(--primary-color);
+    border-radius: 50%;
+    animation: checkout-spin .8s linear infinite;
+}
+
+.checkout-loading > span:last-child {
+    color: var(--text-light);
+    font-size: .9rem;
+}
+
+@keyframes checkout-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .checkout-loading-spinner {
+        animation-duration: 1.8s;
+    }
+}
+
 
 /*==========================================
     PAYMENT
@@ -292,6 +336,36 @@
 
 }
 
+.ewallet-methods {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 10px;
+
+    margin: -2px 0 4px 24px;
+
+    padding-left: 14px;
+
+    border-left: 2px solid #f0dada;
+
+}
+
+.ewallet-methods[hidden] {
+
+    display: none;
+
+}
+
+.payment-option--nested .payment-card {
+
+    padding: 12px;
+
+    border-radius: 13px;
+
+}
+
 .payment-option {
 
     cursor: pointer;
@@ -300,7 +374,27 @@
 
 .payment-option input {
 
-    display: none;
+    position: absolute;
+
+    width: 1px;
+
+    height: 1px;
+
+    overflow: hidden;
+
+    clip: rect(0, 0, 0, 0);
+
+    white-space: nowrap;
+
+    clip-path: inset(50%);
+
+}
+
+.payment-option input:focus-visible + .payment-card {
+
+    outline: 3px solid rgba(183, 28, 28, .3);
+
+    outline-offset: 2px;
 
 }
 
@@ -383,6 +477,22 @@
     color: #ddd;
 
     font-size: 1.2rem;
+
+}
+
+.payment-expand {
+
+    color: var(--text-light);
+
+    font-size: 1rem;
+
+    transition: transform .2s ease;
+
+}
+
+.payment-option input:checked + .payment-card .payment-expand {
+
+    transform: rotate(180deg);
 
 }
 

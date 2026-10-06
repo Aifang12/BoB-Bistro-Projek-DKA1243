@@ -15,7 +15,7 @@
     <!-- CSS -->
     <link rel="stylesheet" href="css/style.css">
 
-    <link rel="stylesheet" href="css/pages/checkout.css">
+    <link rel="stylesheet" href="css/pages/checkout.css?v=2">
 
 </head>
 
@@ -163,43 +163,121 @@
 
             <div class="payment-options">
 
-                <!-- FPX -->
-
                 <label class="payment-option">
 
-                    <input type="radio" name="paymentMethod" value="FPX">
+                    <input type="radio" id="paymentEwallet" name="paymentChoice" value="E-wallet"
+                        aria-controls="ewalletMethods" aria-expanded="false">
 
                     <div class="payment-card">
 
                         <div class="payment-icon">
 
-                            <i class="bi bi-credit-card"></i>
+                            <i class="bi bi-wallet2"></i>
 
                         </div>
 
                         <div class="payment-info">
 
-                            <strong>
-                                FPX
-                            </strong>
+                            <strong>E-wallet</strong>
 
-                            <span>
-                                Pembayaran dalam talian melalui FPX
-                            </span>
+                            <span>Pilih TNG eWallet, Boost atau ShopeePay</span>
 
                         </div>
 
-                        <i class="bi bi-check-circle-fill payment-check"></i>
+                        <i class="bi bi-chevron-down payment-expand" aria-hidden="true"></i>
 
                     </div>
 
                 </label>
 
+                <div class="ewallet-methods" id="ewalletMethods" role="group"
+                    aria-label="Pilih penyedia E-wallet" hidden>
+
+                    <label class="payment-option payment-option--nested">
+
+                        <input type="radio" name="ewalletProvider" value="TNG eWallet">
+
+                        <div class="payment-card">
+
+                            <div class="payment-icon">
+
+                                <i class="bi bi-wallet2"></i>
+
+                            </div>
+
+                            <div class="payment-info">
+
+                                <strong>TNG eWallet</strong>
+
+                                <span>Bayar melalui TNG eWallet</span>
+
+                            </div>
+
+                            <i class="bi bi-check-circle-fill payment-check"></i>
+
+                        </div>
+
+                    </label>
+
+                    <label class="payment-option payment-option--nested">
+
+                        <input type="radio" name="ewalletProvider" value="Boost">
+
+                        <div class="payment-card">
+
+                            <div class="payment-icon">
+
+                                <i class="bi bi-wallet2"></i>
+
+                            </div>
+
+                            <div class="payment-info">
+
+                                <strong>Boost</strong>
+
+                                <span>Bayar melalui Boost</span>
+
+                            </div>
+
+                            <i class="bi bi-check-circle-fill payment-check"></i>
+
+                        </div>
+
+                    </label>
+
+                    <label class="payment-option payment-option--nested">
+
+                        <input type="radio" name="ewalletProvider" value="ShopeePay">
+
+                        <div class="payment-card">
+
+                            <div class="payment-icon">
+
+                                <i class="bi bi-wallet2"></i>
+
+                            </div>
+
+                            <div class="payment-info">
+
+                                <strong>ShopeePay</strong>
+
+                                <span>Bayar melalui ShopeePay</span>
+
+                            </div>
+
+                            <i class="bi bi-check-circle-fill payment-check"></i>
+
+                        </div>
+
+                    </label>
+
+                </div>
+
                 <!-- ONLINE BANKING -->
 
                 <label class="payment-option">
 
-                    <input type="radio" name="paymentMethod" value="Online Banking">
+                    <input type="radio" name="paymentChoice" value="Online Banking">
 
                     <div class="payment-card">
 
@@ -215,9 +293,7 @@
                                 Online Banking
                             </strong>
 
-                            <span>
-                                Pembayaran melalui perbankan dalam talian
-                            </span>
+                            <span>Pembayaran melalui perbankan dalam talian</span>
 
                         </div>
 
@@ -227,12 +303,11 @@
 
                 </label>
 
-
                 <!-- CASH -->
 
                 <label class="payment-option">
 
-                    <input type="radio" name="paymentMethod" value="Tunai" checked>
+                    <input type="radio" name="paymentChoice" value="Tunai" checked>
 
                     <div class="payment-card">
 
@@ -263,7 +338,7 @@
             </div>
 
             <p class="input-help">
-                FPX dan Online Banking direkod untuk pengesahan manual. Tiada caj dalam talian diproses pada laman ini.
+                Pembayaran digital disahkan secara automatik. Bayaran tunai perlu dibayar di kaunter.
             </p>
 
         </section>
@@ -318,6 +393,11 @@
 
     </main>
 
+    <div class="checkout-loading" id="checkoutLoading" role="status" aria-live="polite" aria-hidden="true" hidden>
+        <span class="checkout-loading-spinner" aria-hidden="true"></span>
+        <strong>Memproses tempahan anda...</strong>
+        <span>Sila tunggu sebentar.</span>
+    </div>
 
     <!--==========================================
         JAVASCRIPT
@@ -325,7 +405,7 @@
 
     <script src="js/data.js?v=2"></script>
 
-    <script src="js/checkout.js"></script>
+    <script src="js/checkout.js?v=3"></script>
 
 </body>
 

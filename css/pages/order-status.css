@@ -501,6 +501,34 @@
 
 }
 
+.receipt-download-section {
+
+    margin-top: 20px;
+
+}
+
+.receipt-download-section[hidden] {
+
+    display: none;
+
+}
+
+.receipt-download-section .btn {
+
+    width: 100%;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 8px;
+
+    text-decoration: none;
+
+}
+
 
 .order-summary-card {
 

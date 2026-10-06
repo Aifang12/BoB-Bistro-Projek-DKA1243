@@ -58,19 +58,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Log Masuk Kakitangan | B@Bistro</title>
     <link rel="stylesheet" href="../css/style.css">
-    <link rel="stylesheet" href="admin.css">
+    <link rel="stylesheet" href="admin.css?v=19">
 </head>
-<body>
-    <main class="admin-auth">
-        <h1>Log Masuk Kakitangan B@Bistro</h1>
-        <?php if ($error !== ''): ?><p class="admin-message"><?= admin_escape($error) ?></p><?php endif; ?>
-        <form method="post" class="admin-form">
-            <input type="hidden" name="csrf_token" value="<?= admin_escape(admin_csrf_token()) ?>">
-            <label>Nama pengguna<input name="username" maxlength="50" required autocomplete="username"></label>
-            <label>Kata laluan<input type="password" name="password" required autocomplete="current-password"></label>
-            <button class="admin-button" type="submit">Log Masuk</button>
-        </form>
-        <p class="admin-help">Akaun kakitangan disediakan oleh pentadbir sistem.</p>
-    </main>
+<body class="admin-login-page">
+    <div class="admin-login-layout">
+        <section class="admin-login-banner" aria-label="Selamat datang ke B@Bistro">
+            <img class="admin-login-banner-image" src="../images/banners/banner.jpg" alt="">
+            <img class="admin-login-banner-logo" src="../images/logo/logo.svg" alt="B@Bistro">
+            <div class="admin-login-banner-copy">
+                <p class="admin-login-eyebrow">Portal kakitangan</p>
+                <h1>Selamat Datang</h1>
+                <p>Log masuk untuk mengakses panel operasi B@Bistro.</p>
+            </div>
+        </section>
+        <main class="admin-auth">
+            <p class="admin-login-card-eyebrow">Akaun kakitangan</p>
+            <h2>Log masuk</h2>
+            <p class="admin-login-intro">Masukkan maklumat akaun anda untuk meneruskan.</p>
+            <?php if ($error !== ''): ?>
+                <p class="admin-message <?= isset($_GET['setup']) ? 'admin-success' : 'admin-error' ?>"
+                    role="<?= isset($_GET['setup']) ? 'status' : 'alert' ?>">
+                    <?= admin_escape($error) ?>
+                </p>
+            <?php endif; ?>
+            <form method="post" class="admin-form admin-login-form">
+                <input type="hidden" name="csrf_token" value="<?= admin_escape(admin_csrf_token()) ?>">
+                <label for="loginUsername">Nama pengguna</label>
+                <input id="loginUsername" name="username" maxlength="50" placeholder="Masukkan nama pengguna"
+                    required autocomplete="username">
+                <label for="loginPassword">Kata laluan</label>
+                <input id="loginPassword" type="password" name="password" placeholder="Masukkan kata laluan"
+                    required autocomplete="current-password">
+                <button class="admin-button admin-login-submit" type="submit">
+                    Log Masuk <span aria-hidden="true">&rarr;</span>
+                </button>
+            </form>
+            <p class="admin-login-help">Akaun kakitangan disediakan oleh pentadbir sistem.</p>
+            <a class="admin-login-home" href="../index.html">Kembali ke laman utama</a>
+        </main>
+    </div>
+    <footer class="admin-login-footer">
+        <p>&copy; <?= date('Y') ?> B@Bistro. Hak cipta terpelihara.</p>
+    </footer>
 </body>
 </html>

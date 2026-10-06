@@ -1,39 +1,57 @@
 <?php
 
 require_once __DIR__ . '/auth.php';
-admin_require_authentication();
+$isCustomerReceipt = array_key_exists('order', $_GET);
+if (!$isCustomerReceipt) {
+    admin_require_authentication();
+}
 require_once __DIR__ . '/../config.php';
 
-if (!admin_refresh_identity($conn)) {
-    header('Location: login.php?expired=1');
-    exit;
+if (!$isCustomerReceipt) {
+    if (!admin_refresh_identity($conn)) {
+        header('Location: login.php?expired=1');
+        exit;
+    }
+
+    if (!in_array($_SESSION['admin_role'], ['Admin', 'Cashier'], true)) {
+        http_response_code(403);
+        exit('Anda tidak mempunyai kebenaran untuk melihat resit.');
+    }
 }
 
-if (!in_array($_SESSION['admin_role'], ['Admin', 'Cashier'], true)) {
-    http_response_code(403);
-    exit('Anda tidak mempunyai kebenaran untuk melihat resit.');
+$rawReceiptNumber = $_GET['receipt'] ?? '';
+$rawOrderNumber = $_GET['order'] ?? '';
+if (!is_string($rawReceiptNumber) || !is_string($rawOrderNumber)) {
+    http_response_code(400);
+    exit('Nombor resit atau tempahan tidak sah.');
 }
-
-$receiptNumber = trim((string) ($_GET['receipt'] ?? ''));
-if (!preg_match('/\ABAB-R-[A-F0-9]{12}\z/', $receiptNumber)) {
+$receiptNumber = trim($rawReceiptNumber);
+$orderNumber = trim($rawOrderNumber);
+if ($isCustomerReceipt && !preg_match('/\ABAB-[A-F0-9]{16}\z/', $orderNumber)) {
+    http_response_code(400);
+    exit('Nombor tempahan tidak sah.');
+}
+if (!$isCustomerReceipt && !preg_match('/\ABAB-R-[A-F0-9]{12}\z/', $receiptNumber)) {
     http_response_code(400);
     exit('Nombor resit tidak sah.');
 }
 
+$lookupColumn = $isCustomerReceipt ? 'orders.order_number' : 'receipts.receipt_number';
+$lookupValue = $isCustomerReceipt ? $orderNumber : $receiptNumber;
 $statement = $conn->prepare(
     "SELECT receipts.receipt_number, receipts.issued_at,
             payments.amount, payments.payment_method, payments.payment_status,
-            orders.order_number, orders.notes, restaurant_tables.table_number
+            orders.order_id, orders.order_number, orders.notes, restaurant_tables.table_number
      FROM receipts
      INNER JOIN payments ON payments.payment_id = receipts.payment_id
      INNER JOIN orders ON orders.order_id = payments.order_id
      INNER JOIN table_sessions ON table_sessions.session_id = orders.session_id
      INNER JOIN restaurant_tables ON restaurant_tables.table_id = table_sessions.table_id
-     WHERE receipts.receipt_number = ?
+     WHERE $lookupColumn = ?
        AND payments.payment_status = 'Berjaya'
      LIMIT 1"
 );
-$statement->bind_param('s', $receiptNumber);
+$statement->bind_param('s', $lookupValue);
 $statement->execute();
 $receipt = $statement->get_result()->fetch_assoc();
 
@@ -44,13 +62,9 @@ if (!$receipt) {
 
 $itemStatement = $conn->prepare(
     'SELECT item_name_snapshot, unit_price, quantity
-     FROM order_items
-     WHERE order_id = (
-        SELECT order_id FROM orders WHERE order_number = ?
-     )
-     ORDER BY order_item_id'
+     FROM order_items WHERE order_id = ? ORDER BY order_item_id'
 );
-$itemStatement->bind_param('s', $receipt['order_number']);
+$itemStatement->bind_param('i', $receipt['order_id']);
 $itemStatement->execute();
 $items = $itemStatement->get_result()->fetch_all(MYSQLI_ASSOC);
 
@@ -65,7 +79,7 @@ function receipt_escape(string $value): string
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Resit <?= receipt_escape($receipt['receipt_number']) ?> | B@Bistro</title>
-    <link rel="stylesheet" href="receipt.css?v=2">
+    <link rel="stylesheet" href="receipt.css?v=3">
 </head>
 <body>
     <main class="receipt">
@@ -103,8 +117,12 @@ function receipt_escape(string $value): string
 
         <p class="receipt-thanks">Terima kasih kerana memilih B@Bistro.</p>
         <div class="receipt-actions">
-            <button type="button" onclick="window.print()">Cetak Resit</button>
-            <a href="index.php">Kembali ke panel</a>
+            <button type="button" onclick="window.print()">Muat turun / Cetak PDF</button>
+            <?php if ($isCustomerReceipt): ?>
+                <a href="../order-status.html?order=<?= rawurlencode($receipt['order_number']) ?>">Kembali ke pesanan</a>
+            <?php else: ?>
+                <a href="index.php">Kembali ke panel</a>
+            <?php endif; ?>
         </div>
     </main>
 </body>

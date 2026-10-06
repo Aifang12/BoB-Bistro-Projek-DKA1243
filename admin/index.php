@@ -66,12 +66,8 @@ $paymentTransitions = [
     'Dipulangkan' => ['Dipulangkan'],
 ];
 $kitchenTransitions = [
-    'Menunggu' => ['Menunggu', 'Sedang Disediakan'],
-    'Sedang Disediakan' => ['Sedang Disediakan', 'Sedia Diambil'],
-    'Sedia Diambil' => ['Sedia Diambil', 'Diserahkan'],
-    'Diserahkan' => ['Diserahkan'],
-    'Selesai' => ['Selesai'],
-    'Dibatalkan' => ['Dibatalkan'],
+    'Menunggu' => ['Menunggu', 'Sedang Disediakan', 'Dibatalkan'],
+    'Sedang Disediakan' => ['Sedang Disediakan', 'Sedia Diambil', 'Dibatalkan'],
 ];
 
 try {
@@ -125,7 +121,7 @@ try {
             }
 
             $paymentStatement = $conn->prepare(
-                'SELECT payment_id, payment_status FROM payments WHERE order_id = ? FOR UPDATE'
+                'SELECT payment_id, payment_method, payment_status FROM payments WHERE order_id = ? FOR UPDATE'
             );
             $paymentStatement->bind_param('i', $orderId);
             $paymentStatement->execute();
@@ -147,6 +143,7 @@ try {
                 $newOrderStatus = $currentOrder['order_status'];
             }
             $newPaymentStatus = $canManagePayments
+                && ($isAdmin || $currentPayment['payment_method'] === 'Tunai')
                 ? (string) ($_POST['payment_status'] ?? $currentPayment['payment_status'])
                 : $currentPayment['payment_status'];
 
@@ -889,8 +886,11 @@ if (isset($conn) && $conn instanceof mysqli) {
         }
 
         $orderFilter = $userRole === 'Kitchen'
-            ? "WHERE orders.order_status IN ('Menunggu', 'Sedang Disediakan', 'Sedia Diambil', 'Diserahkan')"
+            ? "WHERE orders.order_status IN ('Menunggu', 'Sedang Disediakan')"
             : '';
+        $orderSort = in_array($userRole, ['Admin', 'Cashier'], true)
+            ? 'restaurant_tables.table_number ASC, orders.created_at DESC, orders.order_id DESC'
+            : 'orders.created_at DESC, orders.order_id DESC';
         $ordersResult = $conn->query(
             "SELECT orders.order_id, orders.order_number, orders.session_id,
                     orders.order_status, orders.notes, orders.created_at,
@@ -912,7 +912,7 @@ if (isset($conn) && $conn instanceof mysqli) {
              INNER JOIN payments ON payments.order_id = orders.order_id
              LEFT JOIN receipts ON receipts.payment_id = payments.payment_id
              $orderFilter
-             ORDER BY orders.created_at DESC
+             ORDER BY $orderSort
              LIMIT 100"
         );
         $orders = $ordersResult->fetch_all(MYSQLI_ASSOC);
@@ -995,7 +995,7 @@ if (isset($conn) && $conn instanceof mysqli) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= admin_escape($isAdmin ? 'Panel Pentadbir' : ($userRole === 'Kitchen' ? 'Panel Dapur' : 'Panel Juruwang')) ?> | B@Bistro</title>
     <link rel="stylesheet" href="../css/style.css">
-    <link rel="stylesheet" href="admin.css?v=10">
+    <link rel="stylesheet" href="admin.css?v=11">
 </head>
 <body data-admin-section-default="<?= admin_escape($adminSectionAfterAction) ?>">
     <main class="admin-page">
@@ -1216,12 +1216,14 @@ if (isset($conn) && $conn instanceof mysqli) {
         </section>
         <?php endif; ?>
 
-        <section class="admin-panel"<?= $isAdmin || $userRole === 'Kitchen' || $userRole === 'Cashier' ? ' id="admin-section-orders" data-admin-section="orders"' : '' ?>>
+        <section class="admin-panel"<?= $isAdmin || in_array($userRole, ['Kitchen', 'Cashier'], true) ? ' id="admin-section-orders" data-admin-section="orders"' : '' ?>>
             <h2><?= $userRole === 'Kitchen' ? 'Pesanan aktif' : ($userRole === 'Cashier' ? 'Semakan bil, pembayaran dan resit' : 'Pesanan terkini') ?></h2>
             <p class="admin-help">
-                <?= $canManagePayments
-                    ? 'Semak item dan jumlah bil. Sahkan pembayaran setelah diterima; pesanan yang diserahkan dan dibayar boleh ditutup serta resitnya dicetak.'
-                    : 'Semak item pesanan sebenar dan kemas kini status penyediaan sehingga pesanan diserahkan kepada juruwang.' ?>
+                <?= in_array($userRole, ['Admin', 'Cashier'], true)
+                    ? 'Pesanan diasingkan mengikut meja dan disusun daripada yang terbaru bagi setiap meja. Online Banking dan E-wallet disahkan automatik; rekod bayaran tunai selepas diterima. Pesanan yang diserahkan dan dibayar boleh ditutup.'
+                    : ($isAdmin
+                        ? 'Semak item dan jumlah bil, status pesanan serta bayaran. Pesanan yang diserahkan dan dibayar boleh ditutup serta resitnya dicetak.'
+                        : 'Semak item pesanan dan kemas kini status penyediaan. Pesanan yang sedia diambil akan dipaparkan dalam modul Pelayan.') ?>
             </p>
                     <?php if ($orders === []): ?>
                         <p>Belum ada pesanan.</p>
@@ -1232,11 +1234,22 @@ if (isset($conn) && $conn instanceof mysqli) {
                                     <tr><th>Pesanan</th><th>Meja</th><th>Item</th><th>Jumlah</th><th>Status pesanan / bayaran</th></tr>
                                 </thead>
                                 <tbody>
+                                    <?php $previousTableNumber = null; ?>
                                     <?php foreach ($orders as $order): ?>
                                         <?php
-                                        $allowedOrderStatuses = $orderTransitions[$order['order_status']] ?? [$order['order_status']];
+                                        $allowedOrderStatuses = $userRole === 'Kitchen'
+                                            ? ($kitchenTransitions[$order['order_status']] ?? [])
+                                            : ($orderTransitions[$order['order_status']] ?? [$order['order_status']]);
                                         $allowedPaymentStatuses = $paymentTransitions[$order['payment_status']] ?? [$order['payment_status']];
+                                        $canUpdatePayment = $canManagePayments
+                                            && ($isAdmin || $order['payment_method'] === 'Tunai');
                                         ?>
+                                        <?php if (in_array($userRole, ['Admin', 'Cashier'], true) && $previousTableNumber !== (int) $order['table_number']): ?>
+                                            <tr class="admin-order-table-group">
+                                                <th colspan="5" scope="rowgroup">Meja <?= (int) $order['table_number'] ?></th>
+                                            </tr>
+                                            <?php $previousTableNumber = (int) $order['table_number']; ?>
+                                        <?php endif; ?>
                                         <tr>
                                             <td>
                                                 <strong><?= admin_escape($order['order_number']) ?></strong>
@@ -1267,7 +1280,7 @@ if (isset($conn) && $conn instanceof mysqli) {
                                                     <?php else: ?>
                                                         <span>Status pesanan: <?= admin_escape($order['order_status']) ?></span>
                                                     <?php endif; ?>
-                                                    <?php if ($canManagePayments): ?>
+                                                    <?php if ($canUpdatePayment): ?>
                                                         <label>Status pembayaran
                                                             <select name="payment_status">
                                                                 <?php foreach ($allowedPaymentStatuses as $status): ?>
@@ -1278,7 +1291,9 @@ if (isset($conn) && $conn instanceof mysqli) {
                                                     <?php else: ?>
                                                         <span>Status bayaran: <?= admin_escape($order['payment_status']) ?></span>
                                                     <?php endif; ?>
-                                                    <button class="admin-button" type="submit">Simpan</button>
+                                                    <?php if ($canManageOrders || $canUpdatePayment): ?>
+                                                        <button class="admin-button" type="submit">Simpan</button>
+                                                    <?php endif; ?>
                                                 </form>
                                                 <?php if ($canManagePayments && $order['payment_status'] === 'Berjaya' && !empty($order['receipt_number'])): ?>
                                                     <a class="admin-receipt-link" href="receipt.php?receipt=<?= rawurlencode($order['receipt_number']) ?>" target="_blank" rel="noopener">Cetak Resit</a>

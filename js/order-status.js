@@ -11,6 +11,8 @@ const cartBadge = document.getElementById('cartBadge');
 const orderNumber = new URLSearchParams(window.location.search).get('order');
 const successHeading = document.querySelector('.success-section h1');
 const orderPageMessage = document.getElementById('orderPageMessage');
+const receiptActions = document.getElementById('receiptActions');
+const receiptLink = document.getElementById('receiptLink');
 
 const orderStatuses = {
     Menunggu: {
@@ -76,6 +78,15 @@ function renderOrder(order) {
         order.payment_method,
         order.payment_status
     );
+    if (receiptActions && receiptLink) {
+        const hasReceipt = order.payment_status === 'Berjaya' && typeof order.receipt_url === 'string';
+        receiptActions.hidden = !hasReceipt;
+        if (hasReceipt) {
+            receiptLink.href = order.receipt_url;
+            receiptLink.target = '_blank';
+            receiptLink.rel = 'noopener';
+        }
+    }
     orderNotesElement.textContent = order.notes || 'Tiada komen';
     orderTotalElement.textContent = `RM ${Number(order.total).toFixed(2)}`;
     statusIcon.replaceChildren();

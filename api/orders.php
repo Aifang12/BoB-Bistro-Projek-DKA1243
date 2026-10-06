@@ -15,11 +15,13 @@ function find_order(mysqli $conn, string $orderNumber): ?array
     $statement = $conn->prepare(
         'SELECT orders.order_id, orders.order_number, orders.order_status,
                 orders.notes, orders.created_at, restaurant_tables.table_number,
-                payments.payment_method, payments.payment_status, payments.amount
+                payments.payment_method, payments.payment_status, payments.amount,
+                receipts.receipt_number
          FROM orders
          INNER JOIN table_sessions ON table_sessions.session_id = orders.session_id
          INNER JOIN restaurant_tables ON restaurant_tables.table_id = table_sessions.table_id
          INNER JOIN payments ON payments.order_id = orders.order_id
+         LEFT JOIN receipts ON receipts.payment_id = payments.payment_id
          WHERE orders.order_number = ?
          LIMIT 1'
     );
@@ -61,6 +63,9 @@ function find_order(mysqli $conn, string $orderNumber): ?array
         'created_at' => $order['created_at'],
         'payment_method' => $order['payment_method'],
         'payment_status' => $order['payment_status'],
+        'receipt_url' => $order['payment_status'] === 'Berjaya' && $order['receipt_number'] !== null
+            ? 'admin/receipt.php?order=' . rawurlencode($order['order_number'])
+            : null,
         'total' => (float) $order['amount'],
         'items' => $items,
     ];
@@ -71,7 +76,11 @@ try {
     $requestMethod = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 
     if ($requestMethod === 'GET') {
-        $orderNumber = strtoupper(trim((string) ($_GET['order'] ?? '')));
+        $rawOrderNumber = $_GET['order'] ?? '';
+        if (!is_string($rawOrderNumber)) {
+            order_api_response(400, ['error' => 'Nombor tempahan tidak sah.']);
+        }
+        $orderNumber = strtoupper(trim($rawOrderNumber));
         if (!preg_match('/\ABAB-[A-F0-9]{16}\z/', $orderNumber)) {
             order_api_response(400, ['error' => 'Nombor tempahan tidak sah.']);
         }
@@ -115,7 +124,8 @@ try {
     if (!is_array($rawItems) || count($rawItems) < 1 || count($rawItems) > 50) {
         order_api_response(422, ['error' => 'Bakul kosong atau mempunyai terlalu banyak jenis item.']);
     }
-    if (!is_string($paymentMethod) || !in_array($paymentMethod, ['Tunai', 'FPX', 'Online Banking'], true)) {
+    $paymentMethods = ['Tunai', 'Online Banking', 'TNG eWallet', 'Boost', 'ShopeePay'];
+    if (!is_string($paymentMethod) || !in_array($paymentMethod, $paymentMethods, true)) {
         order_api_response(422, ['error' => 'Sila pilih kaedah pembayaran yang disokong.']);
     }
     if (!is_string($notes)) {
@@ -261,16 +271,24 @@ try {
         $historyStatement->bind_param('is', $orderId, $initialStatus);
         $historyStatement->execute();
 
-        $paymentStatus = $paymentMethod === 'Tunai'
-            ? 'Belum Dibayar'
-            : 'Menunggu Pengesahan';
+        $paymentStatus = $paymentMethod === 'Tunai' ? 'Belum Dibayar' : 'Berjaya';
         $amount = number_format($totalCents / 100, 2, '.', '');
         $paymentStatement = $conn->prepare(
-            'INSERT INTO payments (order_id, amount, payment_method, payment_status)
-             VALUES (?, ?, ?, ?)'
+            'INSERT INTO payments (order_id, amount, payment_method, payment_status, paid_at)
+             VALUES (?, ?, ?, ?, IF(? = \'Berjaya\', CURRENT_TIMESTAMP, NULL))'
         );
-        $paymentStatement->bind_param('isss', $orderId, $amount, $paymentMethod, $paymentStatus);
+        $paymentStatement->bind_param('issss', $orderId, $amount, $paymentMethod, $paymentStatus, $paymentStatus);
         $paymentStatement->execute();
+        $paymentId = (int) $conn->insert_id;
+
+        if ($paymentStatus === 'Berjaya') {
+            $receiptNumber = 'BAB-R-' . strtoupper(bin2hex(random_bytes(6)));
+            $receiptStatement = $conn->prepare(
+                'INSERT INTO receipts (payment_id, receipt_number) VALUES (?, ?)'
+            );
+            $receiptStatement->bind_param('is', $paymentId, $receiptNumber);
+            $receiptStatement->execute();
+        }
 
         $conn->commit();
     } catch (Throwable $exception) {
